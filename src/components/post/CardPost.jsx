@@ -16,7 +16,7 @@ function CardPost({
   className = '',
 }) {
   return (
-    <Link to={postId}>
+    <Link to={`/${postId}`} relative="path">
       <div
         className={`min-h-16 w-full rounded-md bg-base-200 p-2 transition hover:shadow ${className}`}
       >
