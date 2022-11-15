@@ -1,29 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button, Form, Input, Modal, Textarea } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
-import { FaPlus, FaUserAlt } from 'react-icons/fa';
+import { FaPlus, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
 import CardPost from '../components/post/CardPost';
+import UserContext from '../contexts/UserContext';
 
 function Home() {
+  const user = useContext(UserContext);
   const [posts, setPosts] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [accessToken] = reactUseCookie('accessToken');
+  const [accessToken, setAccessToken] = reactUseCookie('accessToken');
+  const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
   const { register, handleSubmit } = useForm();
   const [loading, setLoading] = useState({});
-  const { get, post, response } = useFetch(import.meta.env.VITE_API_URL, {
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-  });
-
+  const { get, post, response, patch } = useFetch(
+    import.meta.env.VITE_API_URL,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+  const navigate = useNavigate();
   const onSubmit = (data) => {
     addPost(data);
   };
   const toggleVisible = () => {
     setVisible(!visible);
+  };
+
+  const handleSignOut = async () => {
+    setLoading({ status: true, data: 'user:signout' });
+    await patch(`/authentications`, { refreshToken });
+    setAccessToken('');
+    setRefreshToken('');
+    navigate('/signin');
+    setLoading({});
   };
 
   async function addPost(data) {
@@ -52,20 +68,23 @@ function Home() {
     <Container>
       <div className="my-4">
         <div className="flex gap-2">
+          <Button startIcon={<FaPlus />} onClick={toggleVisible} />
+          <Button
+            startIcon={<FaUserAlt />}
+            onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
+            shape="circle"
+          />
           <Input
             placeholder="Cari postingan..."
             className="w-full"
             color="primary"
           />
           <Button
-            children="Buat"
-            startIcon={<FaPlus />}
-            onClick={toggleVisible}
-          />
-          <Button
-            startIcon={<FaUserAlt />}
+            startIcon={<FaSignOutAlt />}
+            color="warning"
+            onClick={handleSignOut}
+            loading={loading.data === 'user:signout' && loading.status}
             shape="circle"
-            onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
           />
         </div>
       </div>

@@ -1,10 +1,11 @@
 import { Badge, Button } from 'react-daisyui';
 import { FaCalendar, FaComment } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import ReactTimeAgo from 'react-time-ago';
 
 function CardPost({
   id: postId,
-  owner: userId,
+  owner,
   title,
   status,
   caption,
@@ -18,9 +19,9 @@ function CardPost({
   return (
     <Link to={postId}>
       <div
-        className={`min-h-16 w-full rounded-md bg-base-200 p-2 transition hover:shadow ${className}`}
+        className={`min-h-16 w-full rounded-xl bg-base-200 p-2 transition hover:shadow ${className}`}
       >
-        <div className="flex items-center gap-x-4 rounded-md border-b pb-2">
+        <div className="flex items-center gap-x-4 border-b-2 border-neutral border-opacity-50 pb-2">
           <div className="h-12 w-12 overflow-hidden rounded-full bg-base-content object-cover">
             <img src={photo} />
           </div>
@@ -48,9 +49,12 @@ function CardPost({
           <Button
             startIcon={<FaCalendar />}
             size={'xs'}
-            children={new Date(inserted_at).toLocaleDateString('id', {
-              dateStyle: 'full',
-            })}
+            children={
+              <ReactTimeAgo
+                date={new Date(inserted_at ? inserted_at : 0)}
+                timeStyle="twitter"
+              ></ReactTimeAgo>
+            }
             animation={false}
           />
         </div>

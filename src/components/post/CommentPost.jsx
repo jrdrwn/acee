@@ -1,4 +1,5 @@
 import { Badge } from 'react-daisyui';
+import ReactTimeAgo from 'react-time-ago';
 
 function CommentPost({
   id: CommentId,
@@ -9,22 +10,26 @@ function CommentPost({
   photo,
 }) {
   return (
-    <div className="mb-4">
-      <div className="flex items-center gap-2">
-        <div className="inline-block h-5 w-5 overflow-hidden rounded-full bg-base-content">
+    <div>
+      <span className="flex items-center gap-2">
+        <span className="inline-block h-5 w-5 overflow-hidden rounded-full bg-base-content">
           <img src={photo} />
-        </div>
-        <div className="font-medium">{fullname}</div>
-      </div>
-      <p className="ml-7 text-sm">{text}</p>
-      <Badge
-        className="ml-7"
-        size="sm"
-        variant="outline"
-        children={new Date(inserted_at).toLocaleDateString('id', {
-          dateStyle: 'full',
-        })}
-      />
+        </span>
+        <Badge
+          size="sm"
+          variant="outline"
+          children={
+            <ReactTimeAgo
+              date={new Date(inserted_at ? inserted_at : 0)}
+              timeStyle="twitter"
+            ></ReactTimeAgo>
+          }
+        />
+      </span>
+      <p className="text-sm">
+        <span className="mr-1 font-medium">{fullname}</span>
+        {text}
+      </p>
     </div>
   );
 }

@@ -27,7 +27,10 @@ function SignIn() {
       setAccessToken(res.data.accessToken);
       navigate('/');
     } else {
-      setNotif({ status: 'error', text: res.message });
+      setNotif({
+        status: 'error',
+        text: res ? res.message : 'Tidak dapat tersambung ke server',
+      });
     }
   };
   return (

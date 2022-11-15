@@ -4,12 +4,13 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
+import UserContext from '../contexts/UserContext';
 
 function CheckAuth() {
   const [loading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken] = reactUseCookie('refreshToken');
-  const [profile, setProfile] = reactUseCookie('profile');
+  const [user, setUser] = useState({});
   const { get, put, response } = useFetch(import.meta.env.VITE_API_URL, {
     headers: {
       authorization: `Bearer ${accessToken}`,
@@ -22,7 +23,7 @@ function CheckAuth() {
     setLoading(true);
     const res = await get('/users/me');
     setLoading(false);
-    if (response.ok) setProfile(JSON.stringify(res.data.user));
+    if (response.ok) setUser(res.data.user);
     else updateToken();
   }
 
@@ -45,7 +46,9 @@ function CheckAuth() {
           <Button loading="true" color="ghost" children={'Checking user...'} />
         </Container>
       ) : (
-        <Outlet />
+        <UserContext.Provider value={user}>
+          <Outlet />
+        </UserContext.Provider>
       )}
     </>
   );
