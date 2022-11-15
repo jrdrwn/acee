@@ -11,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<CheckAuth />}>
           <Route index element={<Home />} />
-          <Route path="/:postId" element={<ViewPost />} />
+          <Route path="view" element={<ViewPost />} />
         </Route>
 
         <Route path="/signin" element={<SignIn />} />
