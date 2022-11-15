@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Input } from 'react-daisyui';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
@@ -8,7 +8,7 @@ import CardPost from '../components/post/CardPost';
 import CommentPost from '../components/post/CommentPost';
 
 function ViewPost() {
-  const [searchParams] = useSearchParams();
+  const { postId } = useParams();
   const [post, setPost] = useState({});
   const [comments, setComments] = useState([]);
   const [accessToken] = reactUseCookie('accessToken');
@@ -27,7 +27,7 @@ function ViewPost() {
   const handleComment = async () => {
     const resPost = await postMethod('/comments', {
       text: commentInputRef.current.value,
-      postId: searchParams.get('postId'),
+      postId,
     });
     if (response.ok) {
       const resGet = await get(`/comments/${resPost.data.commentId}`);
@@ -45,7 +45,7 @@ function ViewPost() {
   };
 
   async function getComments() {
-    const res = await get(`posts/comment/${searchParams.get('postId')}`);
+    const res = await get(`posts/comment/${postId}`);
     setLoading(false);
     if (response.ok) setComments(res.data.comments);
     else {
@@ -54,7 +54,7 @@ function ViewPost() {
   }
 
   async function getPost() {
-    const res = await get(`/posts/${searchParams.get('postId')}`);
+    const res = await get(`/posts/${postId}`);
 
     if (response.ok) {
       setPost(res.data.post);

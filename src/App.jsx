@@ -9,10 +9,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<CheckAuth />}>
-          <Route index element={<Home />} />
-          <Route path="view" element={<ViewPost />} />
-        </Route>
+        <Route index path="/" element={<CheckAuth children={<Home />} />} />
+        <Route
+          index
+          path="/:postId"
+          element={<CheckAuth children={<ViewPost />} />}
+        />
 
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
