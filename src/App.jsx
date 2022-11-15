@@ -18,7 +18,7 @@ function App() {
           }
         />
         <Route
-          path="/:postId"
+          path=":postId"
           element={
             <CheckAuth>
               <ViewPost />

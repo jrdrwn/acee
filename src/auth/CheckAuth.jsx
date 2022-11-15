@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from 'react-daisyui';
+import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
@@ -14,6 +15,8 @@ function CheckAuth({ children }) {
       authorization: `Bearer ${accessToken}`,
     },
   });
+
+  const navigate = useNavigate();
 
   async function getMe() {
     setLoading(true);
