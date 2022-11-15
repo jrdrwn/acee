@@ -4,34 +4,31 @@ import { useForm } from 'react-hook-form';
 import { FaKey, FaSignInAlt, FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
+import { useFetch } from 'use-http';
 import SignInIlustration from '../components/ilustrations/SignInIlustration';
 import Container from '../components/layouts/Container';
 
 function SignIn() {
   const navigate = useNavigate();
   const [notif, setNotif] = useState({ status: false, text: '' });
+  const [loading, setLoading] = useState(false);
   const [, setRefreshToken] = reactUseCookie('refreshToken');
   const [, setAccessToken] = reactUseCookie('accessToken');
   const { register, handleSubmit } = useForm();
+  const { post, response } = useFetch(import.meta.env.VITE_API_URL);
 
-  const onSubmit = (data) => {
-    fetch(`${import.meta.env.VITE_API_URL}/authentications`, {
-      method: 'post',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json?.status === 'success') {
-          setRefreshToken(json.data.refreshToken);
-          setAccessToken(json.data.accessToken);
-          navigate('/');
-        } else {
-          setNotif({ status: 'error', text: json.message });
-        }
-      });
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setNotif({});
+    const res = await post('/authentications', data);
+    setLoading(false);
+    if (response.ok) {
+      setRefreshToken(res.data.refreshToken);
+      setAccessToken(res.data.accessToken);
+      navigate('/');
+    } else {
+      setNotif({ status: 'error', text: res.message });
+    }
   };
   return (
     <Container>
@@ -64,12 +61,17 @@ function SignIn() {
           />
         </InputGroup>
         <div className="mt-4 flex justify-between">
-          <Button
-            children="Sign In"
-            size="sm"
-            startIcon={<FaSignInAlt />}
-            type="submit"
-          />
+          <div>
+            <Button
+              children={'Sign In'}
+              size="sm"
+              startIcon={<FaSignInAlt />}
+              type="submit"
+            />
+            {loading && (
+              <Button color="ghost" loading={true} size="sm" shape="circle" />
+            )}
+          </div>
           <Link to={'/signup'}>
             <Button children="Sign Up" variant="outline" size="sm" />
           </Link>

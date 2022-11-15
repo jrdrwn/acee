@@ -3,30 +3,23 @@ import { Alert, Button, Form, Input, InputGroup } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
 import { FaKey, FaPlus, FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
+import { useFetch } from 'use-http';
 import SignUpIlustration from '../components/ilustrations/SignUpIlustration';
 import Container from '../components/layouts/Container';
 
 function SignUp() {
   const { register, handleSubmit } = useForm();
   const [notif, setNotif] = useState({ status: false, text: '' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const onSubmit = (data) => {
-    setNotif({ status: 'info', text: 'Tunggu sebentar!' });
-    fetch(`${import.meta.env.VITE_API_URL}/users`, {
-      method: 'post',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.status === 'success') {
-          return navigate('/signin');
-        } else {
-          setNotif({ status: 'error', text: json.message });
-        }
-      });
+  const { post, response } = useFetch(import.meta.env.VITE_API_URL);
+  const onSubmit = async (data) => {
+    setNotif({});
+    setLoading(true);
+    const res = await post('/users', data);
+    setLoading(false);
+    if (response.ok) navigate('/signin');
+    else setNotif({ status: 'error', text: res.message });
   };
   return (
     <Container>
@@ -69,12 +62,17 @@ function SignUp() {
           />
         </InputGroup>
         <div className="mt-4 flex justify-between">
-          <Button
-            children="Create Account"
-            size="sm"
-            startIcon={<FaPlus />}
-            type="submit"
-          />
+          <div>
+            <Button
+              children="Create Account"
+              size="sm"
+              startIcon={<FaPlus />}
+              type="submit"
+            />
+            {loading && (
+              <Button color="ghost" loading={true} size="sm" shape="circle" />
+            )}
+          </div>
           <Link to={'/signin'}>
             <Button children="Sign In" variant="outline" size="sm" />
           </Link>

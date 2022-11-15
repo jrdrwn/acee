@@ -2,87 +2,51 @@ import { useEffect, useState } from 'react';
 import { Button, Form, Input, Modal, Textarea } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
 import { FaPlus, FaUserAlt } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
+import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
 import CardPost from '../components/post/CardPost';
 
 function Home() {
   const [posts, setPosts] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [accessToken, setAccessToken] = reactUseCookie('accessToken');
-  const [refreshToken] = reactUseCookie('refreshToken');
+  const [accessToken] = reactUseCookie('accessToken');
   const { register, handleSubmit } = useForm();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState({});
+  const { get, post, response } = useFetch(import.meta.env.VITE_API_URL, {
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   const onSubmit = (data) => {
-    fetch(`${import.meta.env.VITE_API_URL}/posts`, {
-      method: 'post',
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.status === 'success') {
-          window.location.reload();
-        } else {
-          fetch(`${import.meta.env.VITE_API_URL}/authentications`, {
-            method: 'put',
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({ refreshToken }),
-          })
-            .then((res) => res.json())
-            .then((json) => {
-              if (json.status === 'success') {
-                setAccessToken(json.data.accessToken);
-                setVisible(false);
-                window.location.reload();
-              } else {
-                navigate('/signin');
-              }
-            });
-        }
-      });
+    addPost(data);
   };
   const toggleVisible = () => {
     setVisible(!visible);
   };
 
+  async function addPost(data) {
+    setLoading({ status: true, data: 'posts:add' });
+    await post('/posts', data);
+    setLoading({});
+    if (response.ok) {
+      window.location.reload();
+    }
+  }
+
+  async function getPosts() {
+    setLoading({ status: true, data: 'posts:init' });
+    const res = await get('/posts');
+    setLoading({});
+    if (response.ok) {
+      setPosts(res.data.posts);
+    }
+  }
+
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/posts`, {
-      method: 'get',
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.status === 'success') {
-          setPosts(json.data.posts);
-        } else {
-          fetch(`${import.meta.env.VITE_API_URL}/authentications`, {
-            method: 'put',
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({ refreshToken }),
-          })
-            .then((res) => res.json())
-            .then((json) => {
-              if (json.status === 'success') {
-                setAccessToken(json.data.accessToken);
-              } else {
-                navigate('/signin');
-              }
-            });
-        }
-      });
-  }, [accessToken]);
+    getPosts();
+  }, []);
 
   return (
     <Container>
@@ -100,15 +64,23 @@ function Home() {
           />
           <Button
             startIcon={<FaUserAlt />}
+            shape="circle"
             onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
           />
         </div>
       </div>
-      <div className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <CardPost key={post.id} {...post} />
-        ))}
-      </div>
+      {loading.status && loading.data === 'posts:init' ? (
+        <div>
+          <Button loading={true} children={'Load data from database'} />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {posts.map((post) => (
+            <CardPost key={post.id} {...post} />
+          ))}
+        </div>
+      )}
+
       <Modal open={visible}>
         <Button
           size="sm"
@@ -147,7 +119,11 @@ function Home() {
                 {...register('caption')}
                 required
               />
-              <Button type="submit" children="Save" />
+              <Button
+                type="submit"
+                children="Save"
+                loading={loading.status && loading.data === 'posts:add'}
+              />
             </div>
           </Form>
         </Modal.Body>
