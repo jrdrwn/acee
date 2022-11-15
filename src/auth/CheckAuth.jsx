@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Button } from 'react-daisyui';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
 
-function CheckAuth({ children }) {
+function CheckAuth() {
   const [loading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken] = reactUseCookie('refreshToken');
@@ -45,7 +45,7 @@ function CheckAuth({ children }) {
           <Button loading="true" color="ghost" children={'Checking user...'} />
         </Container>
       ) : (
-        <>{children}</>
+        <Outlet />
       )}
     </>
   );
