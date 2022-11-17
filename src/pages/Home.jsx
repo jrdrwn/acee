@@ -1,7 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Modal, Textarea } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
-import { FaPlus, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
+import {
+  FaImage,
+  FaPlus,
+  FaSignOutAlt,
+  FaTrash,
+  FaUserAlt,
+} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
@@ -12,11 +18,13 @@ import UserContext from '../contexts/UserContext';
 function Home() {
   const user = useContext(UserContext);
   const [posts, setPosts] = useState([]);
+  const [imageUrl, setImageUrl] = useState('');
+
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState({});
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
   const { register, handleSubmit } = useForm();
-  const [loading, setLoading] = useState({});
   const { get, post, response, patch } = useFetch(
     import.meta.env.VITE_API_URL,
     {
@@ -25,8 +33,11 @@ function Home() {
       },
     }
   );
+  const ref = useRef(null);
+
   const navigate = useNavigate();
   const onSubmit = (data) => {
+    data.imageUrl = imageUrl;
     addPost(data);
   };
   const toggleVisible = () => {
@@ -59,7 +70,27 @@ function Home() {
       setPosts(res.data.posts);
     }
   }
+  async function uploadImage(image) {
+    setLoading({ status: true, data: 'posts:upload-image' });
+    const body = new FormData();
+    body.set('image', image);
+    const res = await fetch(
+      'https://api.imgbb.com/1/upload?key=ee9f968f3cc04daecc174efd8c274d77',
+      {
+        method: 'post',
+        body,
+      }
+    );
+    if (res.ok) {
+      setImageUrl((await res.json()).data.display_url);
+    }
+    setLoading({});
+  }
 
+  const handleDeleteImage = () => {
+    setImageUrl('');
+    ref.current.value = '';
+  };
   useEffect(() => {
     getPosts();
   }, []);
@@ -138,12 +169,49 @@ function Home() {
                 {...register('caption')}
                 required
               />
+              {imageUrl && (
+                <div className="relative w-full">
+                  <Button
+                    startIcon={<FaTrash />}
+                    shape="circle"
+                    size="sm"
+                    className="absolute -top-2 -left-2"
+                    onClick={() => {
+                      handleDeleteImage();
+                    }}
+                  />
+                  <img
+                    className="aspect-video w-full rounded-xl object-cover"
+                    src={imageUrl}
+                  />
+                </div>
+              )}
+            </div>
+            <Modal.Actions className="justify-between">
+              <label>
+                <div
+                  className={`btn-circle btn ${
+                    loading.data === 'posts:upload-image' && 'loading'
+                  }`}
+                >
+                  {loading.data !== 'posts:upload-image' && (
+                    <FaImage size={24} />
+                  )}
+                </div>
+                <input
+                  type={'file'}
+                  accept="image/*"
+                  className="hidden"
+                  onInput={(e) => uploadImage(e.target.files[0])}
+                  ref={ref}
+                />
+              </label>
               <Button
                 type="submit"
                 children="Save"
                 loading={loading.status && loading.data === 'posts:add'}
               />
-            </div>
+            </Modal.Actions>
           </Form>
         </Modal.Body>
       </Modal>

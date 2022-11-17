@@ -37,7 +37,12 @@ function CardPost({
           <div>
             <p>{caption}</p>
           </div>
-          {image_url && <div>{media}</div>}
+          {image_url && (
+            <img
+              className="aspect-video w-full rounded-xl object-cover"
+              src={image_url}
+            />
+          )}
         </div>
         <div className="mt-2 flex gap-2">
           <Button
