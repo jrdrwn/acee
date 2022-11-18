@@ -1,12 +1,18 @@
 import { Button } from 'react-daisyui';
 
-function Loading({ loading }) {
+function Loading({ loading, fullWidth = true, children }) {
   return (
     <>
-      {loading && (
-        <div className="flex w-full items-center justify-center ">
+      {loading ? (
+        <div
+          className={`flex ${
+            fullWidth && 'w-full'
+          } items-center justify-center`}
+        >
           <Button loading={true} shape={'circle'} color={'secondary'} />
         </div>
+      ) : (
+        children
       )}
     </>
   );
