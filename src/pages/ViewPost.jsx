@@ -104,7 +104,6 @@ function ViewPost() {
               startIcon={<BsTrashFill />}
               children={'hapus'}
               size="sm"
-              className="mt-2"
             />
           )}
           <CardPost {...post} className="my-2" />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Button, Form, Input, InputGroup } from 'react-daisyui';
+import { Button, Form, Input, InputGroup } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
 import { FaKey, FaPlus, FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
@@ -9,21 +9,19 @@ import Container from '../components/layouts/Container';
 
 function SignUp() {
   const { register, handleSubmit } = useForm();
-  const [notif, setNotif] = useState({ status: false, text: '' });
-  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState();
   const navigate = useNavigate();
-  const { post, response } = useFetch(import.meta.env.VITE_API_URL);
+  const { post, response, loading } = useFetch(import.meta.env.VITE_API_URL);
   const onSubmit = async (data) => {
-    setNotif({});
-    setLoading(true);
     const res = await post('/users', data);
-    setLoading(false);
+    setNotification({
+      text: res ? res.message : 'Tidak dapat tersambung ke server',
+    });
     if (response.ok) navigate('/signin');
-    else setNotif({ status: 'error', text: res.message });
   };
   return (
-    <Container>
-      <Form className="mx-auto mt-8 w-min" onSubmit={handleSubmit(onSubmit)}>
+    <Container notification={notification}>
+      <Form className="mx-auto w-min" onSubmit={handleSubmit(onSubmit)}>
         <SignUpIlustration />
         <InputGroup className="mb-2 mt-2">
           <span>
@@ -33,7 +31,7 @@ function SignUp() {
             type="text"
             placeholder="Name"
             bordered
-            required={true}
+            required
             {...register('fullname')}
           />
         </InputGroup>
@@ -45,7 +43,7 @@ function SignUp() {
             type="text"
             placeholder="Username"
             bordered
-            required={true}
+            required
             {...register('username')}
           />
         </InputGroup>
@@ -57,7 +55,7 @@ function SignUp() {
             type="password"
             placeholder="Password"
             bordered
-            required={true}
+            required
             {...register('password')}
           />
         </InputGroup>
@@ -77,11 +75,6 @@ function SignUp() {
             <Button children="Sign In" variant="outline" size="sm" />
           </Link>
         </div>
-        {notif.status && (
-          <Alert status={notif.status} className="mt-4">
-            {notif.text}
-          </Alert>
-        )}
       </Form>
     </Container>
   );
