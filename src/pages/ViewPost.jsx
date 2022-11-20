@@ -7,147 +7,153 @@ import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
 import CardPost from '../components/post/CardPost';
 import CommentPost from '../components/post/CommentPost';
+import Loading from '../components/utils/Loading';
 import UserContext from '../contexts/UserContext';
 
-function ViewPost() {
+function Comments({ post }) {
   const user = useContext(UserContext);
-  const { postId } = useParams();
-  const [post, setPost] = useState({});
+  const commentInputRef = useRef(null);
   const [comments, setComments] = useState([]);
   const [accessToken] = reactUseCookie('accessToken');
   const navigate = useNavigate();
-  const commentInputRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [visible, setVisible] = useState(false);
   const {
     get,
-    post: postMethod,
+    post: reqPost,
     response,
-    del,
-  } = useFetch(import.meta.env.VITE_API_URL, {
+    loading,
+  } = useFetch(`${import.meta.env.VITE_API_URL}/comments`, {
     headers: {
       authorization: `Bearer ${accessToken}`,
     },
   });
+
   const handleComment = async () => {
-    const resPost = await postMethod('/comments', {
+    await reqPost({
       text: commentInputRef.current.value,
       postId,
     });
+  };
+
+  async function getComments(limit = 5, offset = comments.length) {
+    const res = await get(`/post/${postId}?limit=${limit}&offset=${offset}`);
     if (response.ok) {
-      const resGet = await get(`/comments/${resPost.data.commentId}`);
-      if (response.ok) {
-        setComments([resGet.data.comment, ...comments]);
-        setPost({
-          ...post,
-          comment_count: +post.comment_count + 1,
-        });
-        commentInputRef.current.value = '';
-      }
+      res.length && setComments([...comments, ...res]);
+      res.length && limit < 2 && setComments([...res, ...comments]);
     } else {
-      navigate('/');
-    }
-  };
-  const handleDelete = () => {
-    deletePost();
-  };
-  const toggleVisible = () => {
-    setVisible(!visible);
-  };
-  async function getComments() {
-    const res = await get(`posts/comment/${postId}`);
-    setLoading(false);
-    if (response.ok) setComments(res.data.comments);
-    else {
       navigate('/');
     }
   }
 
-  async function getPost() {
-    const res = await get(`/posts/${postId}`);
+  useEffect(() => {
+    getComments();
+  }, [comments]);
+
+  // useEffect(() => {
+  //   // comments.length >   && getComments(1, 0);
+  // }, [post]);
+
+  return (
+    <>
+      <div className="mt-2 flex gap-2">
+        <Input
+          placeholder="Tambahkan komentar..."
+          className="w-full"
+          size="sm"
+          color="primary"
+          required={true}
+          ref={commentInputRef}
+        />
+        <Loading
+          loading={+post.comment_count === comments.length && loading}
+          fullWidth={false}
+          size="sm"
+        >
+          <Button children={'Kirim'} size={'sm'} onClick={handleComment} />
+        </Loading>
+      </div>
+
+      <div className="mt-2 w-full space-y-2 rounded-xl bg-base-200 p-2 transition hover:shadow">
+        {comments.length
+          ? comments.map((comment) => (
+              <CommentPost key={comment.id} {...comment} />
+            ))
+          : !loading && <p>Tidak ada komentar di postingan ini.</p>}
+        <Loading loading={loading} size="sm" />
+      </div>
+    </>
+  );
+}
+
+function ViewPost() {
+  const user = useContext(UserContext);
+  const { postId } = useParams();
+  const [post, setPost] = useState('');
+  const [visible, setVisible] = useState(false);
+  const [accessToken] = reactUseCookie('accessToken');
+  const navigate = useNavigate();
+
+  const { get, del, response, loading } = useFetch(
+    `${import.meta.env.VITE_API_URL}/posts`,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  async function getPost(postId) {
+    const res = await get(`/${postId}`);
 
     if (response.ok) {
+      console.log(res.data.post);
       setPost(res.data.post);
-      getComments();
     } else {
       navigate('/');
     }
   }
 
   async function deletePost() {
-    setLoading(true);
-    await del(`/posts/${postId}`);
+    await del(`/${postId}`);
     if (response.ok) {
-      navigate('/', { replace: true });
-      window.location.reload();
-    } else {
-      setLoading(false);
+      navigate('..');
     }
   }
 
   useEffect(() => {
-    getPost();
-    getComments();
+    getPost(postId);
   }, []);
 
   return (
-    <>
-      {loading ? (
-        <Container>
-          <Button loading="true" color="ghost" children={'Loading...'} />
-        </Container>
-      ) : (
-        <Container>
-          {user.id === post.owner && (
-            <Button
-              onClick={toggleVisible}
-              startIcon={<BsTrashFill />}
-              children={'hapus'}
-              size="sm"
-            />
-          )}
-          <CardPost {...post} className="my-2" />
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Tambahkan komentar..."
-              className="w-full"
-              size="sm"
-              color="primary"
-              required={true}
-              ref={commentInputRef}
-            />
-            <Button children={'Kirim'} size={'sm'} onClick={handleComment} />
-          </div>
-
-          <div className="mt-2 w-full space-y-2 rounded-xl bg-base-200 p-2 transition hover:shadow">
-            {comments.length ? (
-              comments.map((comment) => (
-                <CommentPost key={comment.id} {...comment} />
-              ))
-            ) : (
-              <p>Tidak ada komentar di postingan ini.</p>
-            )}
-          </div>
-          <Modal open={visible}>
-            <Modal.Body>Apakah yakin untuk menghapus postingan ini?</Modal.Body>
-            <Modal.Actions>
-              <Button
-                size="sm"
-                onClick={toggleVisible}
-                children="tidak"
-              ></Button>
-              <Button
-                size="sm"
-                onClick={handleDelete}
-                children="hapus"
-                color="error"
-              ></Button>
-            </Modal.Actions>
-          </Modal>
-        </Container>
-      )}
-    </>
+    <Container>
+      <Loading loading={loading}>
+        {user.id === post.owner && (
+          <Button
+            onClick={() => setVisible(true)}
+            startIcon={<BsTrashFill />}
+            children={'hapus'}
+            size="sm"
+          />
+        )}
+        <CardPost {...post} className="mt-2" />
+      </Loading>
+      {post && <Comments post={post} getPost={getPost} />}
+      <Modal open={visible}>
+        <Modal.Body>Apakah yakin untuk menghapus postingan ini?</Modal.Body>
+        <Modal.Actions>
+          <Button
+            size="sm"
+            onClick={() => setVisible(false)}
+            children="tidak"
+          ></Button>
+          <Button
+            size="sm"
+            onClick={() => deletePost()}
+            children="hapus"
+            color="error"
+          ></Button>
+        </Modal.Actions>
+      </Modal>
+    </Container>
   );
 }
 

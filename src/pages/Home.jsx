@@ -1,24 +1,27 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, Input } from 'react-daisyui';
 import { FaPlus, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import InfiniteScroll from 'react-infinite-scroller';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Container from '../components/layouts/Container';
 import CardPost from '../components/post/CardPost';
 import CreatePost from '../components/post/CreatePost';
+import ViewPostModal from '../components/post/ViewPostModal';
 import Loading from '../components/utils/Loading';
 import UserContext from '../contexts/UserContext';
 
 function Home() {
   const user = useContext(UserContext);
+  const [URLSearchParams, SetURLSearchParams] = useSearchParams();
   const [posts, setPosts] = useState([]);
 
-  const [visible, setVisible] = useState(false);
+  const [visibleCreatePost, setVisibleCreatePost] = useState(false);
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
 
-  const { get, response, patch, loading } = useFetch(
+  const { get, response, patch, loading, data } = useFetch(
     import.meta.env.VITE_API_URL,
     {
       headers: {
@@ -37,21 +40,24 @@ function Home() {
   };
 
   async function getPosts() {
-    const res = await get(`/posts?limit=5&offset=${posts.length}`);
+    const res = await get(`/posts?limit=10&offset=${posts.length}`);
     if (response.ok) {
-      res.length && setPosts([...posts, ...res]);
+      setPosts([...posts, ...res]);
     }
   }
 
   useEffect(() => {
     getPosts();
-  }, [posts]);
+  }, []);
 
   return (
     <Container>
       <div className="mb-4">
         <div className="flex gap-2">
-          <Button startIcon={<FaPlus />} onClick={() => setVisible(true)} />
+          <Button
+            startIcon={<FaPlus />}
+            onClick={() => setVisibleCreatePost(true)}
+          />
           <Button
             startIcon={<FaUserAlt />}
             onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
@@ -71,13 +77,22 @@ function Home() {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <CardPost key={post.id} {...post} />
-        ))}
-        {loading && <Loading loading={loading} />}
-      </div>
-      <CreatePost visible={visible} setVisible={setVisible} />
+      <InfiniteScroll
+        loadMore={() => !loading && getPosts()}
+        hasMore={!!data?.length}
+      >
+        <div className="flex flex-col gap-4">
+          {posts.map((post, i) => (
+            <CardPost key={i} {...post} />
+          ))}
+          <Loading loading={URLSearchParams.get('postId') ? false : loading} />
+        </div>
+      </InfiniteScroll>
+      <CreatePost
+        visible={visibleCreatePost}
+        setVisible={setVisibleCreatePost}
+      />
+      <ViewPostModal setPosts={setPosts} posts={posts} />
     </Container>
   );
 }

@@ -17,7 +17,7 @@ function CardPost({
   className = '',
 }) {
   return (
-    <Link to={postId}>
+    <Link to={`/?postId=${postId}`}>
       <div
         className={`min-h-16 w-full rounded-xl bg-base-200 p-2 transition hover:shadow ${className}`}
       >

@@ -15,6 +15,7 @@ function CheckAuth() {
       headers: {
         authorization: `Bearer ${accessToken}`,
       },
+      loading: true,
     }
   );
 
