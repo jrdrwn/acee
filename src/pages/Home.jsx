@@ -11,12 +11,14 @@ import Container from '../components/layouts/Container';
 import CardPost from '../components/post/CardPost';
 import CreatePost from '../components/post/CreatePost';
 import ViewPostModal from '../components/post/ViewPostModal';
+import ConfirmModal from '../components/utils/ConfirmModal';
 import Loading from '../components/utils/Loading';
 import UserContext from '../contexts/UserContext';
 
 function HomeHeader({ setVisibleCreatePost }) {
   const user = useContext(UserContext);
-  const [visible, setVisible] = useState(false);
+  const [visibleSettings, setVisibleSettings] = useState(false);
+  const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
   const { patch, del, loading, response } = useFetch(
@@ -57,19 +59,19 @@ function HomeHeader({ setVisibleCreatePost }) {
           <Button
             startIcon={<FaUserAlt />}
             children={user.username}
-            onClick={() => setVisible(true)}
+            onClick={() => setVisibleSettings(true)}
           />
         </div>
       </div>
-      <Modal open={visible} responsive={true}>
+      <Modal open={visibleSettings} responsive={true}>
         <Button
           size="sm"
           shape="circle"
           startIcon={<BsXLg />}
           className="absolute right-2 top-2"
-          onClick={() => setVisible(false)}
+          onClick={() => setVisibleSettings(false)}
         />
-        <Modal.Header>
+        <Modal.Header className="font-bold">
           {user.fullname}
           {user.fullname.endsWith('s') ? `'` : `'s`} Settings
         </Modal.Header>
@@ -85,13 +87,23 @@ function HomeHeader({ setVisibleCreatePost }) {
             <Button
               startIcon={<FaTrashAlt />}
               color="error"
-              onClick={handleDeleteAccount}
+              onClick={() => setVisibleConfirm(true)}
               children={'Delete Account'}
               size={'sm'}
             />
           </Loading>
         </Modal.Actions>
       </Modal>
+      <ConfirmModal
+        open={visibleConfirm}
+        handleVisible={() => setVisibleConfirm(false)}
+        handleAction={handleDeleteAccount}
+        data={{
+          text: 'Semua postingan anda akan terhapus!',
+          ok: 'hapus',
+          no: 'tidak',
+        }}
+      />
     </>
   );
 }

@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import UserContext from '../../contexts/UserContext';
+import ConfirmModal from '../utils/ConfirmModal';
 import Loading from '../utils/Loading';
 import CommentModal from './CommentModal';
 
@@ -60,22 +61,16 @@ function ViewPostModal({ setPosts, posts }) {
           </Modal.Body>
         </Loading>
       </Modal>
-      <Modal open={visible}>
-        <Modal.Body>Apakah yakin untuk menghapus postingan ini?</Modal.Body>
-        <Modal.Actions>
-          <Button
-            size="sm"
-            onClick={() => setVisible(false)}
-            children="tidak"
-          ></Button>
-          <Button
-            size="sm"
-            onClick={() => deletePost(URLSearchParams.get('postId'))}
-            children="hapus"
-            color="error"
-          ></Button>
-        </Modal.Actions>
-      </Modal>
+      <ConfirmModal
+        open={visible}
+        handleVisible={() => setVisible(false)}
+        handleAction={() => deletePost(URLSearchParams.get('postId'))}
+        data={{
+          text: 'Apakah yakin untuk menghapus postingan ini?',
+          no: 'tidak',
+          ok: 'hapus',
+        }}
+      />
     </>
   );
 }
