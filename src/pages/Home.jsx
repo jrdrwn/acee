@@ -49,7 +49,7 @@ function HomeHeader({ setVisibleCreatePost }) {
           className="w-full"
           color="primary"
         />
-        <Loading loading={loading}>
+        <Loading loading={loading} fullWidth={false}>
           <Button
             startIcon={<FaSignOutAlt />}
             color="warning"
