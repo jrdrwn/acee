@@ -1,4 +1,4 @@
-import { Badge, Button } from 'react-daisyui';
+import { Avatar, Badge, Button } from 'react-daisyui';
 import { FaCalendar, FaComment } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import ReactTimeAgo from 'react-time-ago';
@@ -22,9 +22,7 @@ function CardPost({
         className={`min-h-16 w-full rounded-xl bg-base-200 p-2 transition hover:shadow ${className}`}
       >
         <div className="flex items-center gap-x-4 border-b-2 border-neutral border-opacity-50 pb-2">
-          <div className="h-12 w-12 overflow-hidden rounded-full bg-base-content object-cover">
-            <img src={photo} />
-          </div>
+          <Avatar src={photo} size={'xs'} shape={'circle'} />
           <div>
             <div className="font-medium">{fullname}</div>
             <div className="flex items-center gap-2">
