@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
+import CheckAuth from '../auth/CheckAuth';
 import Container from '../components/layouts/Container';
 import CardPost from '../components/post/CardPost';
 import CreatePost from '../components/post/CreatePost';
@@ -12,23 +13,15 @@ import ViewPostModal from '../components/post/ViewPostModal';
 import Loading from '../components/utils/Loading';
 import UserContext from '../contexts/UserContext';
 
-function Home() {
-  const user = useContext(UserContext);
-  const [URLSearchParams, SetURLSearchParams] = useSearchParams();
-  const [posts, setPosts] = useState([]);
-
-  const [visibleCreatePost, setVisibleCreatePost] = useState(false);
+function HomeHeader({ setVisibleCreatePost }) {
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
 
-  const { get, response, patch, loading, data } = useFetch(
-    import.meta.env.VITE_API_URL,
-    {
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const { patch, loading } = useFetch(import.meta.env.VITE_API_URL, {
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   const navigate = useNavigate();
 
@@ -39,6 +32,48 @@ function Home() {
     navigate('/signin');
   };
 
+  return (
+    <div className="mb-4">
+      <div className="flex gap-2">
+        <Button
+          startIcon={<FaPlus />}
+          onClick={() => setVisibleCreatePost(true)}
+        />
+        <Button
+          startIcon={<FaUserAlt />}
+          onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
+          shape="circle"
+        />
+        <Input
+          placeholder="Cari postingan..."
+          className="w-full"
+          color="primary"
+        />
+        <Loading loading={loading}>
+          <Button
+            startIcon={<FaSignOutAlt />}
+            color="warning"
+            onClick={handleSignOut}
+            shape="circle"
+          />
+        </Loading>
+      </div>
+    </div>
+  );
+}
+
+function HomeBody({ visibleCreatePost, setVisibleCreatePost }) {
+  const [posts, setPosts] = useState([]);
+  const [accessToken] = reactUseCookie('accessToken');
+  const [URLSearchParams] = useSearchParams();
+  const { get, response, loading, data } = useFetch(
+    import.meta.env.VITE_API_URL,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
   async function getPosts() {
     const res = await get(`/posts?limit=10&offset=${posts.length}`);
     if (response.ok) {
@@ -49,34 +84,8 @@ function Home() {
   useEffect(() => {
     getPosts();
   }, []);
-
   return (
-    <Container>
-      <div className="mb-4">
-        <div className="flex gap-2">
-          <Button
-            startIcon={<FaPlus />}
-            onClick={() => setVisibleCreatePost(true)}
-          />
-          <Button
-            startIcon={<FaUserAlt />}
-            onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
-            shape="circle"
-          />
-          <Input
-            placeholder="Cari postingan..."
-            className="w-full"
-            color="primary"
-          />
-          <Button
-            startIcon={<FaSignOutAlt />}
-            color="warning"
-            onClick={handleSignOut}
-            loading={loading.data === 'user:signout' && loading.status}
-            shape="circle"
-          />
-        </div>
-      </div>
+    <>
       <InfiniteScroll
         loadMore={() => !loading && getPosts()}
         hasMore={!!data?.length}
@@ -93,7 +102,25 @@ function Home() {
         setVisible={setVisibleCreatePost}
       />
       <ViewPostModal setPosts={setPosts} posts={posts} />
-    </Container>
+    </>
+  );
+}
+
+function Home() {
+  const user = useContext(UserContext);
+
+  const [visibleCreatePost, setVisibleCreatePost] = useState(false);
+
+  return (
+    <CheckAuth>
+      <Container>
+        <HomeHeader setVisibleCreatePost={setVisibleCreatePost} />
+        <HomeBody
+          setVisibleCreatePost={setVisibleCreatePost}
+          visibleCreatePost={visibleCreatePost}
+        />
+      </Container>
+    </CheckAuth>
   );
 }
 

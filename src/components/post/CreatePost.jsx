@@ -11,11 +11,14 @@ function CreatePost({ visible, setVisible }) {
   const ref = useRef(null);
   const [accessToken] = reactUseCookie('accessToken');
   const { register, handleSubmit } = useForm();
-  const { post, response, loading } = useFetch(import.meta.env.VITE_API_URL, {
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const { post, response, loading, data } = useFetch(
+    import.meta.env.VITE_API_URL,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
   const reqUploadImage = useFetch(
     'https://api.imgbb.com/1/upload?key=ee9f968f3cc04daecc174efd8c274d77',
     {
@@ -23,15 +26,15 @@ function CreatePost({ visible, setVisible }) {
     }
   );
 
-  async function addPost(data) {
-    await post('/posts', data);
+  async function addPost(postData) {
+    const res = await post('/posts', postData);
     if (response.ok) {
       window.location.reload();
     }
   }
-  const onSubmit = (data) => {
-    data.imageUrl = imageUrl;
-    addPost(data);
+  const onSubmit = (postData) => {
+    postData.imageUrl = imageUrl;
+    addPost(postData);
   };
   async function uploadImage(image) {
     const body = new FormData();
@@ -47,7 +50,7 @@ function CreatePost({ visible, setVisible }) {
     ref.current.value = '';
   };
   return (
-    <Modal open={visible}>
+    <Modal open={visible} responsive={true}>
       <Button
         size="sm"
         shape="circle"

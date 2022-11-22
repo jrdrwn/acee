@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import LoadingOverlay from '../components/utils/LoadingOverlay';
 import UserContext from '../contexts/UserContext';
 
-function CheckAuth() {
+function CheckAuth({ children }) {
+  const [user, setUser] = useState({});
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken] = reactUseCookie('refreshToken');
-  const [user, setUser] = useState({});
   const { get, put, response, loading } = useFetch(
     import.meta.env.VITE_API_URL,
     {
@@ -16,6 +16,7 @@ function CheckAuth() {
         authorization: `Bearer ${accessToken}`,
       },
       loading: true,
+      cachePolicy: 'no-cache',
     }
   );
 
@@ -23,14 +24,12 @@ function CheckAuth() {
 
   async function getMe() {
     const res = await get('/users/me');
-    if (response.ok) setUser(res.data.user);
-    else updateToken();
+    response.ok ? setUser(res) : updateToken();
   }
 
   async function updateToken() {
     const res = await put('/authentications', { refreshToken });
-    if (response.ok) setAccessToken(res.data.accessToken);
-    else navigate('/signin');
+    response.ok ? setAccessToken(res.accessToken) : navigate('/signin');
   }
 
   useEffect(() => {
@@ -42,9 +41,7 @@ function CheckAuth() {
       {loading ? (
         <LoadingOverlay loading={loading} />
       ) : (
-        <UserContext.Provider value={user}>
-          <Outlet />
-        </UserContext.Provider>
+        <UserContext.Provider value={user}>{children}</UserContext.Provider>
       )}
     </>
   );
