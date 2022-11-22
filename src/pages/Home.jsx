@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Modal } from 'react-daisyui';
+import { Avatar, Button, Form, Input, Modal } from 'react-daisyui';
+import { useForm } from 'react-hook-form';
 import { BsXLg } from 'react-icons/bs';
 import { FaPlus, FaSignOutAlt, FaTrashAlt, FaUserAlt } from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -17,11 +18,13 @@ import UserContext from '../contexts/UserContext';
 
 function HomeHeader({ setVisibleCreatePost }) {
   const user = useContext(UserContext);
+  const [imageUrl, setImageUrl] = useState(user.photo);
+  const { register, handleSubmit } = useForm();
   const [visibleSettings, setVisibleSettings] = useState(false);
   const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
-  const { patch, del, loading, response } = useFetch(
+  const { patch, del, loading, put, response } = useFetch(
     import.meta.env.VITE_API_URL,
     {
       headers: {
@@ -29,7 +32,12 @@ function HomeHeader({ setVisibleCreatePost }) {
       },
     }
   );
-
+  const reqUploadImage = useFetch(
+    'https://api.imgbb.com/1/upload?key=ee9f968f3cc04daecc174efd8c274d77',
+    {
+      cachePolicy: 'no-cache',
+    }
+  );
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -47,6 +55,27 @@ function HomeHeader({ setVisibleCreatePost }) {
       navigate('/signin');
     }
   };
+
+  const updateUser = async (data) => {
+    await put('/users', data);
+    response.ok && window.location.reload();
+  };
+
+  const onSubmit = ({ username, fullname }) => {
+    user.photo = imageUrl;
+    user.username = username ? username : user.username;
+    user.fullname = fullname ? fullname : user.fullname;
+    updateUser(user);
+  };
+
+  async function uploadImage(image) {
+    const body = new FormData();
+    body.set('image', image);
+    const res = await reqUploadImage.post(body);
+    if (reqUploadImage.response.ok) {
+      setImageUrl(res.data.display_url);
+    }
+  }
 
   return (
     <>
@@ -75,8 +104,42 @@ function HomeHeader({ setVisibleCreatePost }) {
           {user.fullname}
           {user.fullname.endsWith('s') ? `'` : `'s`} Settings
         </Modal.Header>
-        <Modal.Actions>
-          <Loading loading={loading} fullWidth={false}>
+        <Loading loading={loading} fullWidth={false}>
+          <Modal.Body className="flex flex-col items-center gap-2">
+            <label>
+              <input
+                type={'file'}
+                accept="image/*"
+                className="hidden"
+                onInput={(e) => uploadImage(e.target.files[0])}
+              />
+              <Loading loading={reqUploadImage.loading}>
+                <Avatar
+                  src={imageUrl}
+                  shape={'circle'}
+                  border={true}
+                  size={'md'}
+                  className="rounded-full bg-secondary"
+                />
+              </Loading>
+            </label>
+            <Form className="gap-2" onSubmit={handleSubmit(onSubmit)}>
+              <Input
+                placeholder={'Username'}
+                size={'sm'}
+                className={'w-full'}
+                {...register('username')}
+              />
+              <Input
+                placeholder={'Nama'}
+                size={'sm'}
+                className={'w-full'}
+                {...register('fullname')}
+              />
+              <Button children="simpan" size="sm" />
+            </Form>
+          </Modal.Body>
+          <Modal.Actions className="flex-wrap">
             <Button
               startIcon={<FaSignOutAlt />}
               color="warning"
@@ -91,8 +154,8 @@ function HomeHeader({ setVisibleCreatePost }) {
               children={'Delete Account'}
               size={'sm'}
             />
-          </Loading>
-        </Modal.Actions>
+          </Modal.Actions>
+        </Loading>
       </Modal>
       <ConfirmModal
         open={visibleConfirm}
