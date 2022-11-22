@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Input } from 'react-daisyui';
-import { FaPlus, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
+import { Button, Modal } from 'react-daisyui';
+import { BsXLg } from 'react-icons/bs';
+import { FaPlus, FaSignOutAlt, FaTrashAlt, FaUserAlt } from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroller';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
@@ -14,14 +15,18 @@ import Loading from '../components/utils/Loading';
 import UserContext from '../contexts/UserContext';
 
 function HomeHeader({ setVisibleCreatePost }) {
+  const user = useContext(UserContext);
+  const [visible, setVisible] = useState(false);
   const [accessToken, setAccessToken] = reactUseCookie('accessToken');
   const [refreshToken, setRefreshToken] = reactUseCookie('refreshToken');
-
-  const { patch, loading } = useFetch(import.meta.env.VITE_API_URL, {
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const { patch, del, loading, response } = useFetch(
+    import.meta.env.VITE_API_URL,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 
   const navigate = useNavigate();
 
@@ -32,33 +37,62 @@ function HomeHeader({ setVisibleCreatePost }) {
     navigate('/signin');
   };
 
+  const handleDeleteAccount = async () => {
+    await del('/users');
+    if (response.ok) {
+      setAccessToken('');
+      setRefreshToken('');
+      navigate('/signin');
+    }
+  };
+
   return (
-    <div className="mb-4">
-      <div className="flex gap-2">
-        <Button
-          startIcon={<FaPlus />}
-          onClick={() => setVisibleCreatePost(true)}
-        />
-        <Button
-          startIcon={<FaUserAlt />}
-          onClick={() => confirm('Fitur ini akan tersedia nanti :)')}
-          shape="circle"
-        />
-        <Input
-          placeholder="Cari postingan..."
-          className="w-full"
-          color="primary"
-        />
-        <Loading loading={loading} fullWidth={false}>
+    <>
+      <div className="mb-4">
+        <div className="flex gap-2">
           <Button
-            startIcon={<FaSignOutAlt />}
-            color="warning"
-            onClick={handleSignOut}
-            shape="circle"
+            startIcon={<FaPlus />}
+            onClick={() => setVisibleCreatePost(true)}
           />
-        </Loading>
+          <Button
+            startIcon={<FaUserAlt />}
+            children={user.username}
+            onClick={() => setVisible(true)}
+          />
+        </div>
       </div>
-    </div>
+      <Modal open={visible} responsive={true}>
+        <Button
+          size="sm"
+          shape="circle"
+          startIcon={<BsXLg />}
+          className="absolute right-2 top-2"
+          onClick={() => setVisible(false)}
+        />
+        <Modal.Header>
+          {user.fullname}
+          {user.fullname.endsWith('s') ? `'` : `'s`} Settings
+        </Modal.Header>
+        <Modal.Actions>
+          <Loading loading={loading} fullWidth={false}>
+            <Button
+              startIcon={<FaSignOutAlt />}
+              color="warning"
+              onClick={handleSignOut}
+              children={'Sign Out'}
+              size={'sm'}
+            />
+            <Button
+              startIcon={<FaTrashAlt />}
+              color="error"
+              onClick={handleDeleteAccount}
+              children={'Delete Account'}
+              size={'sm'}
+            />
+          </Loading>
+        </Modal.Actions>
+      </Modal>
+    </>
   );
 }
 
@@ -72,6 +106,7 @@ function HomeBody({ visibleCreatePost, setVisibleCreatePost }) {
       headers: {
         authorization: `Bearer ${accessToken}`,
       },
+      cachePolicy: 'no-cache',
     }
   );
   async function getPosts() {
@@ -107,8 +142,6 @@ function HomeBody({ visibleCreatePost, setVisibleCreatePost }) {
 }
 
 function Home() {
-  const user = useContext(UserContext);
-
   const [visibleCreatePost, setVisibleCreatePost] = useState(false);
 
   return (

@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Button, Modal } from 'react-daisyui';
 import { BsTrash, BsXLg } from 'react-icons/bs';
 import { useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
+import UserContext from '../../contexts/UserContext';
 import Loading from '../utils/Loading';
 import CommentModal from './CommentModal';
 
 function ViewPostModal({ setPosts, posts }) {
+  const user = useContext(UserContext);
   const [visible, setVisible] = useState(false);
   const [URLSearchParams, SetURLSearchParams] = useSearchParams();
   const [accessToken] = reactUseCookie('accessToken');
@@ -28,13 +30,17 @@ function ViewPostModal({ setPosts, posts }) {
     <>
       <Modal open={!!URLSearchParams.get('postId')} responsive={true}>
         <Loading loading={loading}>
-          <Button
-            children={<BsTrash />}
-            size="sm"
-            className="absolute top-2"
-            shape="circle"
-            onClick={() => setVisible(true)}
-          />
+          {posts.filter((post) => post.id === URLSearchParams.get('postId'))[0]
+            ?.owner === user.id && (
+            <Button
+              children={<BsTrash />}
+              size="sm"
+              className="absolute top-2"
+              shape="circle"
+              onClick={() => setVisible(true)}
+            />
+          )}
+
           <Button
             children={<BsXLg />}
             size="sm"
