@@ -1,8 +1,22 @@
 import { useContext, useEffect, useState } from 'react';
-import { Avatar, Button, Form, Input, Modal } from 'react-daisyui';
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Form,
+  Input,
+  Modal,
+  useTheme,
+} from 'react-daisyui';
 import { useForm } from 'react-hook-form';
 import { BsXLg } from 'react-icons/bs';
-import { FaPlus, FaSignOutAlt, FaTrashAlt, FaUserAlt } from 'react-icons/fa';
+import {
+  FaPalette,
+  FaPlus,
+  FaSignOutAlt,
+  FaTrashAlt,
+  FaUserAlt,
+} from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroller';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
@@ -16,8 +30,57 @@ import ConfirmModal from '../components/utils/ConfirmModal';
 import Loading from '../components/utils/Loading';
 import UserContext from '../contexts/UserContext';
 
+const DEFAULT_THEMES = [
+  'valentine',
+  'dracula',
+  'business',
+  'night',
+  'luxury',
+  'black',
+  'retro',
+];
+
+function ThemeItem({ dataTheme, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      role="button"
+      aria-label="Theme select"
+      aria-pressed="false"
+      tabIndex="0"
+      data-theme={dataTheme}
+      className="overflow-hidden rounded-lg border border-base-content/20 outline-2 outline-offset-2 outline-base-content hover:border-base-content/40"
+    >
+      <div className="w-full cursor-pointer bg-base-100 font-sans text-base-content">
+        <div className="grid grid-cols-5 grid-rows-3">
+          <div className="col-start-1 row-span-2 row-start-1 bg-base-200"></div>
+          <div className="col-start-1 row-start-3 bg-base-300"></div>
+          <div className="col-span-4 col-start-2 row-span-3 row-start-1 flex flex-col gap-1 bg-base-100 p-2">
+            <div className="font-bold">{dataTheme}</div>
+            <div className="flex flex-wrap gap-1">
+              <div className="flex aspect-square w-5 items-center justify-center rounded bg-primary lg:w-6">
+                <div className="text-sm font-bold text-primary-content">A</div>
+              </div>
+              <div className="flex aspect-square w-5 items-center justify-center rounded bg-secondary lg:w-6">
+                <div className="text-sm font-bold text-primary-content">A</div>
+              </div>
+              <div className="flex aspect-square w-5 items-center justify-center rounded bg-accent lg:w-6">
+                <div className="text-sm font-bold text-primary-content">A</div>
+              </div>
+              <div className="flex aspect-square w-5 items-center justify-center rounded bg-neutral lg:w-6">
+                <div className="text-sm font-bold text-primary-content">A</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HomeHeader({ setVisibleCreatePost }) {
   const user = useContext(UserContext);
+  const { theme, setTheme } = useTheme();
   const [imageUrl, setImageUrl] = useState(user.photo);
   const { register, handleSubmit } = useForm();
   const [visibleSettings, setVisibleSettings] = useState(false);
@@ -76,7 +139,12 @@ function HomeHeader({ setVisibleCreatePost }) {
       setImageUrl(res.data.display_url);
     }
   }
-
+  useEffect(() => {
+    setTheme(window.localStorage.getItem('sb-react-daisyui-preview-theme'));
+    document.documentElement.dataset.theme = window.localStorage.getItem(
+      'sb-react-daisyui-preview-theme'
+    );
+  }, []);
   return (
     <>
       <div className="mb-4">
@@ -90,6 +158,29 @@ function HomeHeader({ setVisibleCreatePost }) {
             children={user.username}
             onClick={() => setVisibleSettings(true)}
           />
+          <Dropdown hover={true} horizontal={'left'} vertical={'middle'}>
+            <Dropdown.Toggle>
+              <FaPalette />
+            </Dropdown.Toggle>
+            <Dropdown.Menu className="flex h-40 w-40 flex-row gap-2 overflow-scroll">
+              {DEFAULT_THEMES.map((t, i) => (
+                <ThemeItem
+                  key={`theme_${t}_#${i}`}
+                  dataTheme={t}
+                  role="button"
+                  aria-label="Theme select"
+                  onClick={() => {
+                    document.documentElement.dataset.theme = t;
+                    window.localStorage.setItem(
+                      'sb-react-daisyui-preview-theme',
+                      t
+                    );
+                    setTheme(t);
+                  }}
+                />
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
       </div>
       <Modal open={visibleSettings} responsive={true}>

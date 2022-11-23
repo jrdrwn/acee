@@ -32,7 +32,7 @@ export default () => {
             straight: false,
           },
           number: { density: { enable: true, area: 800 }, value: 80 },
-          opacity: { value: 1 },
+          opacity: { value: 0.8 },
           shape: { type: 'circle' },
           size: { random: true, value: 5 },
         },
