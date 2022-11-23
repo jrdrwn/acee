@@ -40,6 +40,7 @@ function CommentModal({ postId, setPosts, posts }) {
     );
     if (response.ok) {
       res.length && setComments((comments) => [...comments, ...res]);
+      commentInputRef.current.value = '';
     } else {
       navigate('..');
     }

@@ -1,4 +1,4 @@
-import { Badge } from 'react-daisyui';
+import { Avatar, Badge } from 'react-daisyui';
 import ReactTimeAgo from 'react-time-ago';
 
 function CommentPost({
@@ -12,9 +12,7 @@ function CommentPost({
   return (
     <div>
       <span className="flex items-center gap-2">
-        <span className="inline-block h-5 w-5 overflow-hidden rounded-full bg-base-content">
-          <img src={photo} />
-        </span>
+        <Avatar src={photo} size={20} shape={'circle'} />
         <Badge
           size="sm"
           variant="outline"
@@ -27,7 +25,7 @@ function CommentPost({
         />
       </span>
       <p className="text-sm">
-        <span className="mr-1 font-medium">{fullname}</span>
+        <span className="mr-1 font-medium">{fullname || userId}</span>
         {text}
       </p>
     </div>
