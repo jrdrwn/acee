@@ -28,7 +28,7 @@ function CardPost({
             <div className="font-medium">{fullname}</div>
             <div className="flex items-center gap-2">
               {status && <Badge children={status} />}
-              {title || `@${username}`}
+              {title || <span className="text-sm">@{username}</span>}
             </div>
           </div>
         </div>
