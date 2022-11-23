@@ -12,6 +12,7 @@ function CardPost({
   inserted_at,
   comment_count,
   fullname,
+  username,
   image_url,
   photo,
   className = '',
@@ -26,8 +27,8 @@ function CardPost({
           <div>
             <div className="font-medium">{fullname}</div>
             <div className="flex items-center gap-2">
-              <Badge children={status} />
-              {title}
+              {status && <Badge children={status} />}
+              {title || `@${username}`}
             </div>
           </div>
         </div>

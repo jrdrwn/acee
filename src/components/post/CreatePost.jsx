@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Button, Form, Input, Modal, Textarea } from 'react-daisyui';
+import { Button, Collapse, Form, Input, Modal, Textarea } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
 import { FaImage, FaTrash } from 'react-icons/fa';
 import reactUseCookie from 'react-use-cookie';
@@ -27,6 +27,7 @@ function CreatePost({ visible, setVisible }) {
   );
 
   async function addPost(postData) {
+    console.log(postData);
     const res = await post('/posts', postData);
     if (response.ok) {
       window.location.reload();
@@ -64,22 +65,27 @@ function CreatePost({ visible, setVisible }) {
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-wrap gap-2">
-            <div className="flex gap-2">
-              <Input
-                size="sm"
-                className="w-1/2"
-                placeholder="title..."
-                {...register('title')}
-                required
-              />
-              <Input
-                size="sm"
-                className="w-1/2"
-                placeholder="status..."
-                {...register('status')}
-                required
-              />
-            </div>
+            <Collapse checkbox={true} icon={'arrow'}>
+              <Collapse.Title className="ml-0">
+                <Button size="xs" children={'click me to add title/status'} />
+              </Collapse.Title>
+              <Collapse.Content className="p-1">
+                <div className="mt-1 flex gap-2">
+                  <Input
+                    size="sm"
+                    className="w-1/2"
+                    placeholder="title..."
+                    {...register('title')}
+                  />
+                  <Input
+                    size="sm"
+                    className="w-1/2"
+                    placeholder="status..."
+                    {...register('status')}
+                  />
+                </div>
+              </Collapse.Content>
+            </Collapse>
             <Textarea
               className="w-full"
               placeholder="Your caption..."

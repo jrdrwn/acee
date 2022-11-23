@@ -25,13 +25,15 @@ function CommentModal({ postId, setPosts, posts }) {
   );
 
   const handleComment = async () => {
-    setComments([]);
-    await post('/comments', {
-      text: commentInputRef.current.value,
-      postId,
-    });
-    await getComments(10, 0);
-    await updatePostData();
+    if (commentInputRef.current.value) {
+      setComments([]);
+      await post('/comments', {
+        text: commentInputRef.current.value,
+        postId,
+      });
+      await getComments(10, 0);
+      await updatePostData();
+    }
   };
 
   async function getComments(limit = 10, offset = comments.length) {
@@ -65,7 +67,7 @@ function CommentModal({ postId, setPosts, posts }) {
           className="w-full"
           size="sm"
           color="primary"
-          required={true}
+          required
           ref={commentInputRef}
         />
         <Button children={'Kirim'} size={'sm'} onClick={handleComment} />
