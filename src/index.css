@@ -1,8 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+::-webkit-scrollbar {
+  border-radius: 1rem;
+  width: 0.5rem;
+  background-color: background;
+}
 
-#tsparticles {
-  position: fixed;
-  z-index: -1;
+::-webkit-scrollbar-thumb {
+  background-color: var(--chakra-colors-brand-500);
+  border-radius: 1rem;
 }

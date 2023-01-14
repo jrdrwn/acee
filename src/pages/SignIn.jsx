@@ -1,19 +1,39 @@
-import { useState } from 'react';
-import { Button, Form, Input, InputGroup } from 'react-daisyui';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useColorModeValue,
+  useToast,
+} from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { FaKey, FaSignInAlt, FaUser } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
-import SignInIlustration from '../components/ilustrations/SignInIlustration';
-import Container from '../components/layouts/Container';
-import Loading from '../components/utils/Loading';
+import { PasswordField } from '../components/utils/PasswordField';
 
-function SignInForm({ setNotification }) {
+function SignIn() {
   const navigate = useNavigate();
+  const toash = useToast();
   const [, setRefreshToken] = reactUseCookie('refreshToken');
   const [, setAccessToken] = reactUseCookie('accessToken');
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const { post, response, loading } = useFetch(import.meta.env.VITE_API_URL, {
     cachePolicy: 'no-cache',
   });
@@ -25,68 +45,117 @@ function SignInForm({ setNotification }) {
       setAccessToken(res.accessToken);
       navigate('/');
     } else {
-      setNotification({
-        text: res ? res.message : 'Tidak dapat tersambung ke server',
+      toash({
+        position: 'top-right',
+        title: 'Connection Error',
+        status: 'error',
+        description: res ? res.message : 'Tidak dapat tersambung ke server',
+        duration: 3000,
+        isClosable: true,
       });
     }
   };
 
   return (
-    <Form className="mx-auto w-min" onSubmit={handleSubmit(onSubmit)}>
-      <SignInIlustration />
-      <InputGroup className="mb-2 mt-2 ">
-        <span>
-          <FaUser />
-        </span>
-        <Input
-          type="text"
-          placeholder="Username"
-          name="username"
-          bordered
-          required
-          {...register('username')}
-        />
-      </InputGroup>
-      <InputGroup className="mb-2">
-        <span>
-          <FaKey />
-        </span>
-        <Input
-          type="password"
-          placeholder="Password"
-          name="password"
-          bordered
-          required={true}
-          {...register('password')}
-        />
-      </InputGroup>
-      <div className="mt-4 flex justify-between">
-        <div>
-          <Loading loading={loading} size={'sm'}>
-            <Button
-              children={'Sign In'}
-              size="sm"
-              startIcon={<FaSignInAlt />}
-              type="submit"
-            />
-          </Loading>
-        </div>
-        <Link to={'/signup'}>
-          <Button children="Sign Up" variant="outline" size="sm" />
-        </Link>
-      </div>
-    </Form>
-  );
-}
-
-function SignIn() {
-  const [notification, setNotification] = useState();
-
-  return (
-    <Container notification={notification}>
-      <SignInForm setNotification={setNotification} />
+    <Container
+      maxW="lg"
+      py={{ base: '12', md: '24' }}
+      px={{ base: '0', sm: '8' }}
+    >
+      <Stack spacing="8">
+        <Stack spacing="6">
+          <Stack
+            spacing={{
+              base: '2',
+              md: '3',
+            }}
+            textAlign="center"
+          >
+            <Heading
+              size={useBreakpointValue({
+                base: 'xs',
+                md: 'sm',
+              })}
+            >
+              Log in to your account
+            </Heading>
+            <HStack spacing="1" justify="center">
+              <Text color="muted">Don't have an account?</Text>
+              <Button variant="link" colorScheme="blue">
+                <Link to={'/signup'}>Sign up</Link>
+              </Button>
+            </HStack>
+          </Stack>
+        </Stack>
+        <Box
+          py={{
+            base: '0',
+            sm: '8',
+          }}
+          px={{
+            base: '4',
+            sm: '10',
+          }}
+          bg={useBreakpointValue({
+            base: 'transparent',
+            sm: 'bg-surface',
+          })}
+          boxShadow={{
+            base: 'none',
+            sm: useColorModeValue('md', 'md-dark'),
+          }}
+          borderRadius={{
+            base: 'none',
+            sm: 'xl',
+          }}
+        >
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing="6">
+              <Stack spacing="5">
+                <FormControl isInvalid={errors.username} isRequired>
+                  <FormLabel htmlFor="username">Username</FormLabel>
+                  <InputGroup>
+                    <InputLeftAddon children={<FaUser />} />
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Username"
+                      {...register('username', {
+                        required: 'This is required',
+                        minLength: {
+                          value: 3,
+                          message: 'Minimum length should be 3',
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {errors.username && errors.username.message}
+                  </FormErrorMessage>
+                </FormControl>
+                <PasswordField register={register} errors={errors} />
+              </Stack>
+              <HStack justify="space-between">
+                <Checkbox defaultChecked>Remember me</Checkbox>
+                <Button variant="link" colorScheme="blue" size="sm">
+                  Forgot password?
+                </Button>
+              </HStack>
+              <Stack spacing="6">
+                <Button
+                  type="submit"
+                  variant="solid"
+                  isLoading={loading}
+                  colorScheme={'blue'}
+                >
+                  Sign in
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
+        </Box>
+      </Stack>
     </Container>
   );
 }
-
 export default SignIn;

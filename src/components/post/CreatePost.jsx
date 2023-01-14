@@ -1,16 +1,32 @@
+import {
+  Box,
+  Button,
+  IconButton,
+  Image,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+} from '@chakra-ui/react';
 import { useRef, useState } from 'react';
-import { Button, Collapse, Form, Input, Modal, Textarea } from 'react-daisyui';
 import { useForm } from 'react-hook-form';
 import { FaImage, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
-import Loading from '../utils/Loading';
+import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
 
-function CreatePost({ visible, setVisible }) {
+export default function CreatePost({ isOpen }) {
+  const navigate = useNavigate();
   const [imageUrl, setImageUrl] = useState('');
   const ref = useRef(null);
   const [accessToken] = reactUseCookie('accessToken');
-  const { register, handleSubmit } = useForm();
+  const { handleSubmit } = useForm();
+  const [caption, setCaption] = useState('');
   const { post, response, loading, data } = useFetch(
     import.meta.env.VITE_API_URL,
     {
@@ -27,14 +43,14 @@ function CreatePost({ visible, setVisible }) {
   );
 
   async function addPost(postData) {
-    console.log(postData);
     const res = await post('/posts', postData);
     if (response.ok) {
-      window.location.reload();
+      navigate(-1);
     }
   }
   const onSubmit = (postData) => {
     postData.imageUrl = imageUrl;
+    postData.caption = caption;
     addPost(postData);
   };
   async function uploadImage(image) {
@@ -51,90 +67,80 @@ function CreatePost({ visible, setVisible }) {
     ref.current.value = '';
   };
   return (
-    <Modal open={visible} responsive={true}>
-      <Button
-        size="sm"
-        shape="circle"
-        className="absolute right-2 top-2"
-        onClick={() => setVisible(false)}
-      >
-        ✕
-      </Button>
-      <Modal.Header className="font-bold">Membuat postingan baru!</Modal.Header>
-
-      <Modal.Body>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-wrap gap-2">
-            <Collapse checkbox={true} icon={'arrow'}>
-              <Collapse.Title className="ml-0">
-                <Button size="xs" children={'click me to add title/status'} />
-              </Collapse.Title>
-              <Collapse.Content className="p-1">
-                <div className="mt-1 flex gap-2">
-                  <Input
-                    size="sm"
-                    className="w-1/2"
-                    placeholder="title..."
-                    {...register('title')}
-                  />
-                  <Input
-                    size="sm"
-                    className="w-1/2"
-                    placeholder="status..."
-                    {...register('status')}
-                  />
-                </div>
-              </Collapse.Content>
-            </Collapse>
-            <Textarea
-              className="w-full"
-              placeholder="Your caption..."
-              {...register('caption')}
-              required
-            />
+    <Modal
+      isOpen={isOpen}
+      onClose={() => navigate(-1)}
+      onCloseComplete={() => data && window.location.reload()}
+      scrollBehavior="inside"
+    >
+      <ModalOverlay />
+      <ModalContent {...ResponsiveModalStyle} overflowY={'auto'}>
+        <ModalCloseButton />
+        <ModalHeader>Create post</ModalHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <ModalBody>
+            <Box
+              contentEditable
+              role={'textbox'}
+              border={'1px'}
+              borderWidth={'thin'}
+              borderRadius={'md'}
+              borderColor={'inherit'}
+              p={2}
+              transitionProperty={'var(--chakra-transition-property-common)'}
+              transitionDuration={'var(--chakra-transition-duration-normal)'}
+              minH={'20'}
+              _focusVisible={{
+                outlineColor: 'var(--chakra-colors-brand-500)',
+                boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)',
+              }}
+              onInput={(ev) => setCaption(ev.currentTarget.innerText)}
+            ></Box>
             {imageUrl && (
-              <div className="relative w-full">
-                <Button
-                  startIcon={<FaTrash />}
-                  shape="circle"
+              <Box pos={'relative'} mt={4}>
+                <IconButton
+                  icon={<FaTrash />}
                   size="sm"
-                  className="absolute -top-2 -left-2"
+                  rounded={'full'}
+                  pos={'absolute'}
+                  top={-2}
+                  left={-2}
                   onClick={() => {
                     handleDeleteImage();
                   }}
                 />
-                <img
-                  className="aspect-video w-full rounded-xl bg-secondary object-cover"
+                <Image
+                  w={'full'}
+                  rounded={'md'}
+                  objectFit={'cover'}
                   src={imageUrl}
                   loading="lazy"
+                  fallback={<Text>Test</Text>}
                 />
-              </div>
+              </Box>
             )}
-          </div>
-          <Modal.Actions className="justify-between">
-            <Loading loading={reqUploadImage.loading} fullWidth={false}>
-              <label>
-                <div className="btn-circle btn">
-                  <FaImage size={24} />
-                </div>
-                <input
-                  type={'file'}
-                  accept="image/*"
-                  className="hidden"
-                  onInput={(e) => uploadImage(e.target.files[0])}
-                  ref={ref}
-                />
-              </label>
-            </Loading>
-
-            <Loading loading={loading} fullWidth={false}>
-              <Button type="submit" children="Save" />
-            </Loading>
-          </Modal.Actions>
-        </Form>
-      </Modal.Body>
+          </ModalBody>
+          <ModalFooter justifyContent={'space-between'}>
+            <label>
+              <IconButton
+                icon={<FaImage size={24} />}
+                as={Box}
+                isLoading={reqUploadImage.loading}
+              />
+              <input
+                type={'file'}
+                accept="image/*"
+                hidden
+                onInput={(e) => uploadImage(e.target.files[0])}
+                ref={ref}
+              />
+            </label>
+            <Button isLoading={loading} type="submit">
+              Save
+            </Button>
+          </ModalFooter>
+        </form>
+      </ModalContent>
     </Modal>
   );
 }
-
-export default CreatePost;

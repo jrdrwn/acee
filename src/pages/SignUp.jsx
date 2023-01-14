@@ -1,16 +1,35 @@
-import { useState } from 'react';
-import { Button, Form, Input, InputGroup } from 'react-daisyui';
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useColorModeValue,
+  useToast,
+} from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { FaKey, FaPlus, FaUser } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFetch } from 'use-http';
-import SignUpIlustration from '../components/ilustrations/SignUpIlustration';
-import Container from '../components/layouts/Container';
-import Loading from '../components/utils/Loading';
+import { PasswordField } from '../components/utils/PasswordField';
 
-function SignUpForm({ setNotification }) {
+function SignUp() {
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm();
+  const toash = useToast();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const { post, response, loading } = useFetch(import.meta.env.VITE_API_URL, {
     cachePolicy: 'no-cache',
   });
@@ -19,75 +38,130 @@ function SignUpForm({ setNotification }) {
     const res = await post('/users', data);
     response.ok
       ? navigate('/signin')
-      : setNotification({
-          text: res ? res.message : 'Tidak dapat tersambung ke server',
+      : toash({
+          position: 'top-right',
+          title: 'Connection Error',
+          status: 'error',
+          description: res ? res.message : 'Tidak dapat tersambung ke server',
+          duration: 3000,
+          isClosable: true,
         });
   };
-
   return (
-    <Form className="mx-auto w-min" onSubmit={handleSubmit(onSubmit)}>
-      <SignUpIlustration />
-      <InputGroup className="mb-2 mt-2">
-        <span>
-          <FaUser />
-        </span>
-        <Input
-          type="text"
-          placeholder="Name"
-          bordered
-          required
-          {...register('fullname')}
-        />
-      </InputGroup>
-      <InputGroup className="mb-2">
-        <span>
-          <FaUser />
-        </span>
-        <Input
-          type="text"
-          placeholder="Username"
-          bordered
-          required
-          {...register('username')}
-        />
-      </InputGroup>
-      <InputGroup className="mb-2">
-        <span>
-          <FaKey />
-        </span>
-        <Input
-          type="password"
-          placeholder="Password"
-          bordered
-          required
-          {...register('password')}
-        />
-      </InputGroup>
-      <div className="mt-4 flex justify-between">
-        <div>
-          <Loading loading={loading} size={'sm'}>
-            <Button
-              children="Create Account"
-              size="sm"
-              startIcon={<FaPlus />}
-              type="submit"
-            />
-          </Loading>
-        </div>
-        <Link to={'/signin'}>
-          <Button children="Sign In" variant="outline" size="sm" />
-        </Link>
-      </div>
-    </Form>
-  );
-}
+    <Container
+      maxW="lg"
+      py={{ base: '12', md: '24' }}
+      px={{ base: '0', sm: '8' }}
+    >
+      <Box
+        py={{
+          base: '0',
+          sm: '8',
+        }}
+        px={{
+          base: '4',
+          sm: '10',
+        }}
+        bg={useBreakpointValue({
+          base: 'transparent',
+          sm: 'bg-surface',
+        })}
+        boxShadow={{
+          base: 'none',
+          sm: useColorModeValue('md', 'md-dark'),
+        }}
+        borderRadius={{
+          base: 'none',
+          sm: 'xl',
+        }}
+      >
+        <Stack spacing="8">
+          <Stack spacing="6">
+            <Stack
+              spacing={{
+                base: '2',
+                md: '3',
+              }}
+              textAlign="center"
+            >
+              <Heading
+                size={useBreakpointValue({
+                  base: 'xs',
+                  md: 'sm',
+                })}
+              >
+                Create an account
+              </Heading>
+              <HStack spacing="1" justify="center">
+                <Text color="muted">Already have an account?</Text>
+                <Button variant="link" colorScheme="blue">
+                  <Link to={'/signin'}>Log In</Link>
+                </Button>
+              </HStack>
+            </Stack>
+          </Stack>
 
-function SignUp() {
-  const [notification, setNotification] = useState();
-
-  return (
-    <Container notification={notification}>
-      <SignUpForm setNotification={setNotification} />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing="6">
+              <Stack spacing="5">
+                <FormControl isInvalid={errors.fullname} isRequired>
+                  <FormLabel htmlFor="fullname">Full Name</FormLabel>
+                  <InputGroup>
+                    <InputLeftAddon children={<FaUser />} />
+                    <Input
+                      id="fullname"
+                      type="text"
+                      placeholder="Full name"
+                      {...register('fullname', {
+                        required: 'This is required',
+                        minLength: {
+                          value: 3,
+                          message: 'Minimum length should be 3',
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {errors.username && errors.username.message}
+                  </FormErrorMessage>
+                </FormControl>
+                <FormControl isInvalid={errors.username} isRequired>
+                  <FormLabel htmlFor="username">Username</FormLabel>
+                  <InputGroup>
+                    <InputLeftAddon children={<FaUser />} />
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Username"
+                      {...register('username', {
+                        required: 'This is required',
+                        minLength: {
+                          value: 3,
+                          message: 'Minimum length should be 3',
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {errors.username && errors.username.message}
+                  </FormErrorMessage>
+                </FormControl>
+                <PasswordField register={register} errors={errors} />
+              </Stack>
+              <Stack spacing="6">
+                <Button
+                  type="submit"
+                  variant="solid"
+                  isLoading={loading}
+                  colorScheme={'blue'}
+                >
+                  Create Account
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
+        </Stack>
+      </Box>
     </Container>
   );
 }
