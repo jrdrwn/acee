@@ -92,15 +92,17 @@ export default function ResponsiveNavBar() {
           </CardBody>
           <CardFooter>
             <Show above="md">
-              <Button
-                leftIcon={<FaSignOutAlt size={24} />}
-                colorScheme={'red'}
-                rounded={'full'}
-                size={'lg'}
-                fontSize={'lg'}
-              >
-                <Text>Keluar</Text>
-              </Button>
+              <Link to={'/login'} replace={true}>
+                <Button
+                  leftIcon={<FaSignOutAlt size={24} />}
+                  colorScheme={'red'}
+                  rounded={'full'}
+                  size={'lg'}
+                  fontSize={'lg'}
+                >
+                  <Text>Keluar</Text>
+                </Button>
+              </Link>
             </Show>
             <Show below="md">
               <Link to={'/login'} replace={true}>
