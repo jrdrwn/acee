@@ -65,7 +65,7 @@ export default function Posts({ filter }) {
   async function getPosts() {
     const res = await get(
       QSS({
-        populate: 'owner,comments,owner.photo',
+        populate: 'owner,comments,owner.photo,media',
         pagination: {
           start: posts.length,
           limit: 3,
@@ -148,7 +148,7 @@ export default function Posts({ filter }) {
                 )}
               </Flex>
             </CardHeader>
-            <CardBody pb={!post.image && 'unset'}>
+            <CardBody pb={!post.media && 'unset'}>
               <ReactMarkdown
                 components={ChakraUIRenderer()}
                 remarkPlugins={[remarkGfm]}
@@ -162,12 +162,13 @@ export default function Posts({ filter }) {
               // ! post.media.provider_metadata.resource_type
               // ? video or image
             */}
-            {post.image?.url && (
+            {post.media?.url && (
               <Image
                 objectFit="cover"
-                src={post.image?.url}
+                src={post.media?.url}
                 rounded={'md'}
-                alt={post.image?.url}
+                mx={2}
+                alt={post.media?.url}
               />
             )}
 

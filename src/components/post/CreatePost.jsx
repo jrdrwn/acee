@@ -10,25 +10,132 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Skeleton,
   Text,
+  Textarea,
+  useToast,
 } from '@chakra-ui/react';
-import { useContext, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { FaImage, FaTrash } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
+import { FaTrash, FaUpload } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
-import UserContext from '../../contexts/UserContext';
 import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
+
+function MediaUpload({ media, setMedia }) {
+  const [jwt] = reactUseCookie('jwt');
+  const toash = useToast({
+    position: 'top-right',
+    duration: 3000,
+    isClosable: true,
+  });
+  const { post, response, loading } = useFetch(import.meta.env.VITE_API_URL, {
+    headers: {
+      authorization: `Bearer ${jwt}`,
+    },
+    cachePolicy: 'no-cache',
+  });
+  async function upload(file) {
+    const body = new FormData();
+    body.set('files', file);
+    const res = await post('/upload', body);
+    if (response.ok && res.length) {
+      toash({
+        title: 'Sukses',
+        description: 'Berhasil mengunggah media',
+        status: 'success',
+      });
+      setMedia(res[0]);
+    } else {
+      toash({
+        title: 'Gagal',
+        description: res ? res.error : 'Gagal mengunggah',
+        status: 'error',
+      });
+    }
+  }
+
+  function handleDeleteMedia() {
+    setMedia(null);
+  }
+  return (
+    <>
+      {media ? (
+        <Box pos={'relative'} mt={4}>
+          <IconButton
+            icon={<FaTrash />}
+            size="sm"
+            rounded={'full'}
+            pos={'absolute'}
+            top={-2}
+            left={-2}
+            onClick={handleDeleteMedia}
+          />
+          <Image
+            w={'full'}
+            rounded={'md'}
+            objectFit={'cover'}
+            src={media.url}
+            mt={2}
+            fallback={<Skeleton w={'full'} rounded={'md'}></Skeleton>}
+          />
+        </Box>
+      ) : (
+        <>
+          <Button
+            leftIcon={<FaUpload />}
+            px={2}
+            py={6}
+            mt={2}
+            gap={2}
+            display={'flex'}
+            h={'max-content'}
+            textAlign={'center'}
+            as={'label'}
+            htmlFor="media-upload"
+            variant={'outline'}
+            cursor={'pointer'}
+            flexDirection={'column'}
+            w={'full'}
+            isLoading={loading}
+          >
+            <Text fontWeight={'semibold'} fontSize={'sm'}>
+              Unggah foto atau video
+            </Text>
+          </Button>
+          <input
+            id="media-upload"
+            type={'file'}
+            accept="image/*"
+            hidden
+            onInput={(e) => upload(e.target.files[0])}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+const useAutosizeTextArea = (textAreaRef, value) => {
+  useEffect(() => {
+    if (textAreaRef) {
+      // We need to reset the height momentarily to get the correct scrollHeight for the textarea
+      textAreaRef.style.height = '0px';
+      const scrollHeight = textAreaRef.scrollHeight;
+
+      // We then set the height directly, outside of the render loop
+      // Trying to set this with state or a ref will product an incorrect value.
+      textAreaRef.style.height = scrollHeight + 'px';
+    }
+  }, [textAreaRef, value]);
+};
 
 export default function CreatePost({ isOpen }) {
   const navigate = useNavigate();
-  const [imageUrl, setImageUrl] = useState('');
-  const ref = useRef(null);
   const [jwt] = reactUseCookie('jwt');
-  const user = useContext(UserContext);
-  const { handleSubmit } = useForm();
   const [content, setContent] = useState('');
+  const [media, setMedia] = useState(null);
+  const ref = useRef(null);
   const { post, response, loading, data } = useFetch(
     import.meta.env.VITE_API_URL,
     {
@@ -37,111 +144,50 @@ export default function CreatePost({ isOpen }) {
       },
     }
   );
-  const reqUploadImage = useFetch(
-    'https://api.imgbb.com/1/upload?key=ee9f968f3cc04daecc174efd8c274d77',
-    {
-      cachePolicy: 'no-cache',
-    }
-  );
-
+  useAutosizeTextArea(ref.current, content);
   async function addPost(postData) {
     const res = await post('/posts', { data: postData });
     if (response.ok) {
       navigate(-1);
     }
   }
-  const onSubmit = (postData) => {
-    postData.image = imageUrl;
-    postData.content = content;
-    addPost(postData);
-  };
-  async function uploadImage(image) {
-    const body = new FormData();
-    body.set('image', image);
-    const res = await reqUploadImage.post(body);
-    if (reqUploadImage.response.ok) {
-      setImageUrl(res.data.display_url);
-    }
+  function handleSubmit() {
+    addPost({ media, content });
   }
 
-  const handleDeleteImage = () => {
-    setImageUrl('');
-    ref.current.value = '';
-  };
   return (
     <Modal
       isOpen={isOpen}
       onClose={() => navigate(-1)}
       onCloseComplete={() => data && window.location.reload()}
       scrollBehavior="inside"
+      size={'full'}
     >
       <ModalOverlay />
       <ModalContent {...ResponsiveModalStyle} overflowY={'auto'}>
         <ModalCloseButton />
         <ModalHeader>Buat postingan</ModalHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalBody>
-            <Box
-              contentEditable
-              role={'textbox'}
-              border={'1px'}
-              borderWidth={'thin'}
-              borderRadius={'md'}
-              borderColor={'inherit'}
-              p={2}
-              transitionProperty={'var(--chakra-transition-property-common)'}
-              transitionDuration={'var(--chakra-transition-duration-normal)'}
-              minH={'20'}
-              _focusVisible={{
-                outlineColor: 'var(--chakra-colors-brand-500)',
-                boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)',
-              }}
-              onInput={(ev) => setContent(ev.currentTarget.innerText)}
-            ></Box>
-            {imageUrl && (
-              <Box pos={'relative'} mt={4}>
-                <IconButton
-                  icon={<FaTrash />}
-                  size="sm"
-                  rounded={'full'}
-                  pos={'absolute'}
-                  top={-2}
-                  left={-2}
-                  onClick={() => {
-                    handleDeleteImage();
-                  }}
-                />
-                <Image
-                  w={'full'}
-                  rounded={'md'}
-                  objectFit={'cover'}
-                  src={imageUrl}
-                  loading="lazy"
-                  fallback={<Text>Test</Text>}
-                />
-              </Box>
-            )}
-          </ModalBody>
-          <ModalFooter justifyContent={'space-between'}>
-            <label>
-              <IconButton
-                icon={<FaImage size={24} />}
-                as={Box}
-                isLoading={reqUploadImage.loading}
-              />
-              <input
-                type={'file'}
-                accept="image/*"
-                hidden
-                onInput={(e) => uploadImage(e.target.files[0])}
-                ref={ref}
-              />
-            </label>
-            <Button isLoading={loading} type="submit">
-              Kirim
-            </Button>
-          </ModalFooter>
-        </form>
+        <ModalBody>
+          <Textarea
+            resize={'none'}
+            overflow={'hidden'}
+            placeholder="Anda sedang memikirkan apa???"
+            _placeholder={{
+              fontSize: 'lg',
+              fontWeight: 'medium',
+              color: 'gray',
+            }}
+            rows={1}
+            ref={ref}
+            onChange={(ev) => setContent(ev.currentTarget.value)}
+          ></Textarea>
+          <MediaUpload media={media} setMedia={setMedia} />
+        </ModalBody>
+        <ModalFooter justifyContent={'space-between'}>
+          <Button isLoading={loading} onClick={handleSubmit}>
+            Kirim
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );
