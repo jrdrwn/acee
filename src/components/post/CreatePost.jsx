@@ -12,26 +12,28 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react';
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaImage, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
+import UserContext from '../../contexts/UserContext';
 import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
 
 export default function CreatePost({ isOpen }) {
   const navigate = useNavigate();
   const [imageUrl, setImageUrl] = useState('');
   const ref = useRef(null);
-  const [accessToken] = reactUseCookie('accessToken');
+  const [jwt] = reactUseCookie('jwt');
+  const user = useContext(UserContext);
   const { handleSubmit } = useForm();
-  const [caption, setCaption] = useState('');
+  const [content, setContent] = useState('');
   const { post, response, loading, data } = useFetch(
     import.meta.env.VITE_API_URL,
     {
       headers: {
-        authorization: `Bearer ${accessToken}`,
+        authorization: `Bearer ${jwt}`,
       },
     }
   );
@@ -43,14 +45,14 @@ export default function CreatePost({ isOpen }) {
   );
 
   async function addPost(postData) {
-    const res = await post('/posts', postData);
+    const res = await post('/posts', { data: postData });
     if (response.ok) {
       navigate(-1);
     }
   }
   const onSubmit = (postData) => {
-    postData.imageUrl = imageUrl;
-    postData.caption = caption;
+    postData.image = imageUrl;
+    postData.content = content;
     addPost(postData);
   };
   async function uploadImage(image) {
@@ -76,7 +78,7 @@ export default function CreatePost({ isOpen }) {
       <ModalOverlay />
       <ModalContent {...ResponsiveModalStyle} overflowY={'auto'}>
         <ModalCloseButton />
-        <ModalHeader>Create post</ModalHeader>
+        <ModalHeader>Buat postingan</ModalHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalBody>
             <Box
@@ -94,7 +96,7 @@ export default function CreatePost({ isOpen }) {
                 outlineColor: 'var(--chakra-colors-brand-500)',
                 boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)',
               }}
-              onInput={(ev) => setCaption(ev.currentTarget.innerText)}
+              onInput={(ev) => setContent(ev.currentTarget.innerText)}
             ></Box>
             {imageUrl && (
               <Box pos={'relative'} mt={4}>
@@ -136,7 +138,7 @@ export default function CreatePost({ isOpen }) {
               />
             </label>
             <Button isLoading={loading} type="submit">
-              Save
+              Kirim
             </Button>
           </ModalFooter>
         </form>

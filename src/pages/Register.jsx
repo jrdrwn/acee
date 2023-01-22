@@ -17,12 +17,12 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { FaUser } from 'react-icons/fa';
+import { FaEnvelope, FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFetch } from 'use-http';
 import { PasswordField } from '../components/utils/PasswordField';
 
-function SignUp() {
+function Register() {
   const navigate = useNavigate();
   const toash = useToast();
   const {
@@ -35,14 +35,16 @@ function SignUp() {
   });
 
   const onSubmit = async (data) => {
-    const res = await post('/users', data);
+    const res = await post('/auth/local/register', data);
     response.ok
-      ? navigate('/signin')
+      ? navigate('/login')
       : toash({
           position: 'top-right',
-          title: 'Connection Error',
+          title: res ? res.error.name : 'Connection Error',
           status: 'error',
-          description: res ? res.message : 'Tidak dapat tersambung ke server',
+          description: res
+            ? res.error.message
+            : 'Tidak dapat tersambung ke server',
           duration: 3000,
           isClosable: true,
         });
@@ -90,12 +92,12 @@ function SignUp() {
                   md: 'sm',
                 })}
               >
-                Create an account
+                Buat sebuah akun
               </Heading>
               <HStack spacing="1" justify="center">
-                <Text color="muted">Already have an account?</Text>
+                <Text color="muted">Sudah punya akun?</Text>
                 <Button variant="link" colorScheme="blue">
-                  <Link to={'/signin'}>Log In</Link>
+                  <Link to={'/login'}>Masuk ke akun</Link>
                 </Button>
               </HStack>
             </Stack>
@@ -104,19 +106,56 @@ function SignUp() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing="6">
               <Stack spacing="5">
-                <FormControl isInvalid={errors.fullname} isRequired>
-                  <FormLabel htmlFor="fullname">Full Name</FormLabel>
+                <HStack>
+                  <Box>
+                    <FormControl isInvalid={errors.firstName} isRequired>
+                      <FormLabel htmlFor="firstName">First Name</FormLabel>
+                      <InputGroup>
+                        <Input
+                          id="firstName"
+                          type="text"
+                          {...register('firstName', {
+                            required: 'This is required',
+                            minLength: {
+                              value: 3,
+                              message: 'Minimum length should be 4',
+                            },
+                          })}
+                        />
+                      </InputGroup>
+                      <FormErrorMessage>
+                        {errors.firstName && errors.firstName.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </Box>
+                  <Box>
+                    <FormControl isInvalid={errors.lastName}>
+                      <FormLabel htmlFor="lastName">Last Name</FormLabel>
+                      <InputGroup>
+                        <Input
+                          id="lastName"
+                          type="text"
+                          {...register('lastName')}
+                        />
+                      </InputGroup>
+                      <FormErrorMessage>
+                        {errors.lastName && errors.lastName.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </Box>
+                </HStack>
+                <FormControl isInvalid={errors.username} isRequired>
+                  <FormLabel htmlFor="username">Username</FormLabel>
                   <InputGroup>
                     <InputLeftAddon children={<FaUser />} />
                     <Input
-                      id="fullname"
+                      id="username"
                       type="text"
-                      placeholder="Full name"
-                      {...register('fullname', {
+                      {...register('username', {
                         required: 'This is required',
                         minLength: {
                           value: 3,
-                          message: 'Minimum length should be 3',
+                          message: 'Minimum length should be 4',
                         },
                       })}
                     />
@@ -125,25 +164,20 @@ function SignUp() {
                     {errors.username && errors.username.message}
                   </FormErrorMessage>
                 </FormControl>
-                <FormControl isInvalid={errors.username} isRequired>
-                  <FormLabel htmlFor="username">Username</FormLabel>
+                <FormControl isInvalid={errors.email} isRequired>
+                  <FormLabel htmlFor="email">Email</FormLabel>
                   <InputGroup>
-                    <InputLeftAddon children={<FaUser />} />
+                    <InputLeftAddon children={<FaEnvelope />} />
                     <Input
-                      id="username"
-                      type="text"
-                      placeholder="Username"
-                      {...register('username', {
+                      id="email"
+                      type="email"
+                      {...register('email', {
                         required: 'This is required',
-                        minLength: {
-                          value: 3,
-                          message: 'Minimum length should be 3',
-                        },
                       })}
                     />
                   </InputGroup>
                   <FormErrorMessage>
-                    {errors.username && errors.username.message}
+                    {errors.email && errors.email.message}
                   </FormErrorMessage>
                 </FormControl>
                 <PasswordField register={register} errors={errors} />
@@ -155,7 +189,7 @@ function SignUp() {
                   isLoading={loading}
                   colorScheme={'blue'}
                 >
-                  Create Account
+                  Buat akun
                 </Button>
               </Stack>
             </Stack>
@@ -166,4 +200,4 @@ function SignUp() {
   );
 }
 
-export default SignUp;
+export default Register;

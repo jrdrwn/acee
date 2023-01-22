@@ -8,38 +8,32 @@ import {
   CardHeader,
   Center,
   HStack,
-  Heading,
   Hide,
   IconButton,
   Show,
   Text,
-  VStack,
-  Wrap,
-  WrapItem,
   useBreakpointValue,
 } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { FaHome, FaPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
-import useSignOut from '../../auth/useSignOut';
+import { Link, NavLink } from 'react-router-dom';
 import UserContext from '../../contexts/UserContext';
 
 export default function ResponsiveNavBar() {
   const user = useContext(UserContext);
-  const SignOut = useSignOut();
   const links = [
     {
-      name: 'Home',
+      name: 'Beranda',
       to: '/',
       icon: <FaHome size={24} />,
     },
     {
-      name: 'Profile',
+      name: 'Profil',
       to: `/profile/${user.id}`,
       icon: <FaUser size={24} />,
     },
     {
-      name: 'Create',
+      name: 'Buat',
       to: '?action=create',
       icon: <FaPlus size={24} />,
     },
@@ -61,7 +55,11 @@ export default function ResponsiveNavBar() {
         >
           <CardHeader>
             <Center>
-              <Avatar size={['sm', 'md', 'lg']} src={user.photo} />
+              <Avatar
+                size={['sm', 'md', 'lg']}
+                src={user.photo?.url}
+                name={user.firstName}
+              />
             </Center>
           </CardHeader>
           <CardBody>
@@ -100,20 +98,20 @@ export default function ResponsiveNavBar() {
                 rounded={'full'}
                 size={'lg'}
                 fontSize={'lg'}
-                onClick={SignOut}
               >
-                <Text>Sign out</Text>
+                <Text>Keluar</Text>
               </Button>
             </Show>
             <Show below="md">
-              <IconButton
-                icon={<FaSignOutAlt size={24} />}
-                colorScheme={'red'}
-                rounded={'full'}
-                size={'lg'}
-                fontSize={'lg'}
-                onClick={SignOut}
-              ></IconButton>
+              <Link to={'/login'} replace={true}>
+                <IconButton
+                  icon={<FaSignOutAlt size={24} />}
+                  colorScheme={'red'}
+                  rounded={'full'}
+                  size={'lg'}
+                  fontSize={'lg'}
+                />
+              </Link>
             </Show>
           </CardFooter>
         </Card>

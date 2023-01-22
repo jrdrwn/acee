@@ -1,39 +1,35 @@
 import { Box, Spinner } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import UserContext from '../contexts/UserContext';
 
-function CheckAuth({ children }) {
+function CheckAuth() {
   const [user, setUser] = useState({});
-  const [accessToken, setAccessToken] = reactUseCookie('accessToken');
-  const [refreshToken] = reactUseCookie('refreshToken');
+  const [jwt] = reactUseCookie('jwt');
   const navigate = useNavigate();
-  const { get, put, response, loading } = useFetch(
-    import.meta.env.VITE_API_URL,
-    {
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
-      loading: true,
-      cachePolicy: 'no-cache',
-    }
-  );
+  const {
+    get,
+    response,
+    loading,
+    data = {},
+  } = useFetch(import.meta.env.VITE_API_URL, {
+    headers: {
+      authorization: `Bearer ${jwt}`,
+    },
+    loading: true,
+    cachePolicy: 'no-cache',
+  });
 
-  async function getMe() {
-    const res = await get('/users/me');
-    response.ok ? setUser(res) : updateToken();
-  }
-
-  async function updateToken() {
-    const res = await put('/authentications', { refreshToken });
-    response.ok ? setAccessToken(res.accessToken) : navigate('/signin');
-  }
+  const getMe = useCallback(async () => {
+    const res = await get('/users/me?populate=*');
+    response.ok ? setUser(res) : navigate('/login');
+  }, []);
 
   useEffect(() => {
     getMe();
-  }, [accessToken]);
+  }, [getMe]);
 
   return (
     <>
@@ -48,7 +44,9 @@ function CheckAuth({ children }) {
           <Spinner />
         </Box>
       ) : (
-        <UserContext.Provider value={user}>{children}</UserContext.Provider>
+        <UserContext.Provider value={user}>
+          <Outlet />
+        </UserContext.Provider>
       )}
     </>
   );

@@ -22,22 +22,20 @@ export default function DeletePostConfirmation({
       <AlertDialogOverlay>
         <AlertDialogContent {...ResponsiveModalStyle}>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Delete Post
+            Hapus postingan
           </AlertDialogHeader>
 
-          <AlertDialogBody>
-            Are you sure? You can't undo this action afterwards.
-          </AlertDialogBody>
+          <AlertDialogBody>Serius menghapus postingan ini?</AlertDialogBody>
 
           <AlertDialogFooter>
-            <Button onClick={() => navigate(-1)}>Cancel</Button>
+            <Button onClick={() => navigate(-1)}>Batal</Button>
             <Button
               colorScheme="red"
               onClick={() => deletePost(postId)}
               ml={3}
               isLoading={loading}
             >
-              Delete
+              Hapus
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

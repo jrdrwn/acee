@@ -29,18 +29,19 @@ import remarkGfm from 'remark-gfm';
 import { useFetch } from 'use-http';
 import UserContext from '../../contexts/UserContext';
 import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
+import QSS from '../utils/qss';
 
 export default function ViewComments({ postId, setPosts, posts, isOpen }) {
   const user = useContext(UserContext);
   const commentInputRef = useRef(null);
   const [comments, setComments] = useState([]);
-  const [accessToken] = reactUseCookie('accessToken');
+  const [jwt] = reactUseCookie('jwt');
   const navigate = useNavigate();
   const { get, post, response, loading, data } = useFetch(
     `${import.meta.env.VITE_API_URL}`,
     {
       headers: {
-        authorization: `Bearer ${accessToken}`,
+        authorization: `Bearer ${jwt}`,
       },
       cachePolicy: 'no-cache',
     }
@@ -50,30 +51,51 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
     if (commentInputRef.current.value) {
       setComments([]);
       await post('/comments', {
-        text: commentInputRef.current.value,
-        postId,
+        data: {
+          content: commentInputRef.current.value,
+          post: postId,
+        },
       });
       await getComments(5, 0);
       await updatePostData();
     }
   };
 
-  async function getComments(limit = 5, offset = comments.length) {
+  async function getComments(limit = 5, start = comments.length) {
     const res = await get(
-      `/comments/post/${postId}?limit=${limit}&offset=${offset}`
+      '/comments'.concat(
+        QSS({
+          populate: 'post,owner,owner.photo',
+          sort: 'createdAt:desc',
+          filters: { post: { id: postId } },
+          pagination: {
+            start,
+            limit,
+          },
+        })
+      )
     );
     if (response.ok) {
-      res.length && setComments((comments) => [...comments, ...res]);
+      res.data.length && setComments((comments) => [...comments, ...res.data]);
       commentInputRef.current.value = '';
+      await updatePostData();
     } else {
       navigate(-1);
     }
   }
 
   async function updatePostData() {
-    const res = await get(`/posts/${postId}`);
+    const res = await get(
+      `/posts/${postId}`.concat(
+        QSS({
+          populate: 'comments.owner,owner,owner.photo',
+        })
+      )
+    );
     if (response.ok) {
-      setPosts(posts.map((post) => (post.id === postId ? res : post)));
+      setPosts(posts.map((post) => (post.id == postId ? res.data : post)));
+    } else {
+      navigate(-1);
     }
   }
 
@@ -110,7 +132,11 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
               ? comments.map((comment) => (
                   <VStack align={'start'} spacing={'unset'} key={comment.id}>
                     <HStack alignItems={'start'}>
-                      <Avatar src={comment.photo} size={'xs'} />
+                      <Avatar
+                        src={comment.owner.photo?.url}
+                        name={comment.owner.firstName}
+                        size={'xs'}
+                      />
                       <VStack>
                         <HStack>
                           <Box fontSize={'sm'}>
@@ -123,13 +149,13 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
                                       mr={2}
                                       display={'inline'}
                                     >
-                                      {comment.fullname}
+                                      {comment.owner.username}
                                     </Text>
                                     {children}
                                   </>
                                 ),
                               })}
-                              children={comment.text}
+                              children={comment.content}
                               remarkPlugins={[remarkGfm]}
                             ></ReactMarkdown>
                           </Box>
@@ -138,11 +164,7 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
                     </HStack>
                     <Box pl={'8'} fontSize={'xs'} color={'GrayText'}>
                       <ReactTimeAgo
-                        date={
-                          new Date(
-                            comment.inserted_at ? comment.inserted_at : 0
-                          )
-                        }
+                        date={new Date(comment.createdAt)}
                         timeStyle="twitter"
                       />
                     </Box>

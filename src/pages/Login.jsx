@@ -24,11 +24,10 @@ import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import { PasswordField } from '../components/utils/PasswordField';
 
-function SignIn() {
+function Login() {
   const navigate = useNavigate();
   const toash = useToast();
-  const [, setRefreshToken] = reactUseCookie('refreshToken');
-  const [, setAccessToken] = reactUseCookie('accessToken');
+  const [, setJwt] = reactUseCookie('jwt');
   const {
     register,
     handleSubmit,
@@ -39,17 +38,18 @@ function SignIn() {
   });
 
   const onSubmit = async (data) => {
-    const res = await post('/authentications', data);
+    const res = await post('/auth/local', data);
     if (response.ok) {
-      setRefreshToken(res.refreshToken);
-      setAccessToken(res.accessToken);
+      setJwt(res.jwt);
       navigate('/');
     } else {
       toash({
         position: 'top-right',
-        title: 'Connection Error',
+        title: res ? res.error.name : 'Connection Error',
         status: 'error',
-        description: res ? res.message : 'Tidak dapat tersambung ke server',
+        description: res
+          ? res.error.message
+          : 'Tidak dapat tersambung ke server',
         duration: 3000,
         isClosable: true,
       });
@@ -77,12 +77,12 @@ function SignIn() {
                 md: 'sm',
               })}
             >
-              Log in to your account
+              Masuk ke akun anda
             </Heading>
             <HStack spacing="1" justify="center">
-              <Text color="muted">Don't have an account?</Text>
+              <Text color="muted">Belum punya akun?</Text>
               <Button variant="link" colorScheme="blue">
-                <Link to={'/signup'}>Sign up</Link>
+                <Link to={'/register'}>Daftar disini</Link>
               </Button>
             </HStack>
           </Stack>
@@ -112,15 +112,16 @@ function SignIn() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing="6">
               <Stack spacing="5">
-                <FormControl isInvalid={errors.username} isRequired>
-                  <FormLabel htmlFor="username">Username</FormLabel>
+                <FormControl isInvalid={errors.identifier} isRequired>
+                  <FormLabel htmlFor="identifier">
+                    Email atau Username
+                  </FormLabel>
                   <InputGroup>
                     <InputLeftAddon children={<FaUser />} />
                     <Input
-                      id="username"
+                      id="identifier"
                       type="text"
-                      placeholder="Username"
-                      {...register('username', {
+                      {...register('identifier', {
                         required: 'This is required',
                         minLength: {
                           value: 3,
@@ -130,16 +131,18 @@ function SignIn() {
                     />
                   </InputGroup>
                   <FormErrorMessage>
-                    {errors.username && errors.username.message}
+                    {errors.identifier && errors.identifier.message}
                   </FormErrorMessage>
                 </FormControl>
                 <PasswordField register={register} errors={errors} />
               </Stack>
               <HStack justify="space-between">
-                <Checkbox defaultChecked>Remember me</Checkbox>
-                <Button variant="link" colorScheme="blue" size="sm">
-                  Forgot password?
-                </Button>
+                <Checkbox defaultChecked>Ingat saya</Checkbox>
+                <Link to={'/forgot-password'}>
+                  <Button variant="link" colorScheme="blue" size="sm">
+                    Lupa kata sandi?
+                  </Button>
+                </Link>
               </HStack>
               <Stack spacing="6">
                 <Button
@@ -148,7 +151,7 @@ function SignIn() {
                   isLoading={loading}
                   colorScheme={'blue'}
                 >
-                  Sign in
+                  Masuk
                 </Button>
               </Stack>
             </Stack>
@@ -158,4 +161,4 @@ function SignIn() {
     </Container>
   );
 }
-export default SignIn;
+export default Login;
