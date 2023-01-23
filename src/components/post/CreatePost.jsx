@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { FaTrash, FaUpload } from 'react-icons/fa';
+import ReactPlayer from 'react-player';
 import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
@@ -60,7 +61,29 @@ function MediaUpload({ media, setMedia }) {
   }
   return (
     <>
-      {media ? (
+      {media?.provider_metadata?.resource_type === 'video' && (
+        <Box overflow={'hidden'} pos={'relative'} rounded={'md'} mt={4}>
+          <IconButton
+            icon={<FaTrash />}
+            size="sm"
+            rounded={'full'}
+            pos={'absolute'}
+            top={-2}
+            left={-2}
+            onClick={handleDeleteMedia}
+            zIndex={1}
+          />
+
+          <ReactPlayer
+            width="100%"
+            height="100%"
+            controls={true}
+            fallback={<Skeleton w={'full'} rounded={'md'} />}
+            url={media.url}
+          />
+        </Box>
+      )}
+      {media?.provider_metadata?.resource_type === 'image' && (
         <Box pos={'relative'} mt={4}>
           <IconButton
             icon={<FaTrash />}
@@ -77,10 +100,11 @@ function MediaUpload({ media, setMedia }) {
             objectFit={'cover'}
             src={media.url}
             mt={2}
-            fallback={<Skeleton w={'full'} rounded={'md'}></Skeleton>}
+            fallback={<Skeleton w={'full'} rounded={'md'} />}
           />
         </Box>
-      ) : (
+      )}
+      {!media && (
         <>
           <Button
             leftIcon={<FaUpload />}
@@ -106,7 +130,7 @@ function MediaUpload({ media, setMedia }) {
           <input
             id="media-upload"
             type={'file'}
-            accept="image/*"
+            accept="image/*,video/*"
             hidden
             onInput={(e) => upload(e.target.files[0])}
           />

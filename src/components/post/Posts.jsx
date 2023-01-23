@@ -24,6 +24,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { FaCalendar, FaComment, FaTrash } from 'react-icons/fa';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import ReactPlayer from 'react-player';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ReactTimeAgo from 'react-time-ago';
 import reactUseCookie from 'react-use-cookie';
@@ -156,22 +157,26 @@ export default function Posts({ filter }) {
                 {post.content.replace(/\n/g, '\n\n')}
               </ReactMarkdown>
             </CardBody>
-            {/*
-              // TODO: add video tag
-              // TODO: customize video and image tag
-              // ! post.media.provider_metadata.resource_type
-              // ? video or image
-            */}
-            {post.media?.url && (
+            {post?.media?.provider_metadata?.resource_type === 'video' && (
+              <Box overflow={'hidden'} pos={'relative'} rounded={'md'} mx={2}>
+                <ReactPlayer
+                  width="100%"
+                  height="100%"
+                  controls={true}
+                  fallback={<Skeleton w={'full'} rounded={'md'} />}
+                  url={post?.media?.url}
+                />
+              </Box>
+            )}
+            {post?.media?.provider_metadata?.resource_type === 'image' && (
               <Image
-                objectFit="cover"
-                src={post.media?.url}
                 rounded={'md'}
+                objectFit={'cover'}
                 mx={2}
-                alt={post.media?.url}
+                src={post?.media?.url}
+                fallback={<Skeleton w={'full'} rounded={'md'} />}
               />
             )}
-
             <CardFooter justify="space-between" flexWrap="wrap">
               <Link
                 to={QSS({
