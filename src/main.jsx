@@ -1,5 +1,6 @@
 import TimeAgo from 'javascript-time-ago';
 import id from 'javascript-time-ago/locale/id.json';
+import 'katex/dist/katex.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';

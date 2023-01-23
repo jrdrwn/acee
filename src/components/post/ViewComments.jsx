@@ -25,7 +25,9 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useNavigate } from 'react-router-dom';
 import ReactTimeAgo from 'react-time-ago';
 import reactUseCookie from 'react-use-cookie';
+import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import { useFetch } from 'use-http';
 import UserContext from '../../contexts/UserContext';
 import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
@@ -33,11 +35,11 @@ import QSS from '../utils/qss';
 
 export default function ViewComments({ postId, setPosts, posts, isOpen }) {
   const user = useContext(UserContext);
-  const commentInputRef = useRef(null);
+  const ref = useRef(null);
   const [comments, setComments] = useState([]);
   const [jwt] = reactUseCookie('jwt');
   const navigate = useNavigate();
-  const { get, post, response, loading, data } = useFetch(
+  const { get, post, response, loading } = useFetch(
     `${import.meta.env.VITE_API_URL}`,
     {
       headers: {
@@ -48,11 +50,11 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
   );
 
   const handleComment = async () => {
-    if (commentInputRef.current.value) {
+    if (ref.current.value) {
       setComments([]);
       await post('/comments', {
         data: {
-          content: commentInputRef.current.value,
+          content: ref.current.value,
           post: postId,
         },
       });
@@ -77,7 +79,7 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
     );
     if (response.ok) {
       res.data.length && setComments((comments) => [...comments, ...res.data]);
-      commentInputRef.current.value = '';
+      ref.current.value = '';
       await updatePostData();
     } else {
       navigate(-1);
@@ -116,15 +118,14 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
         <ModalCloseButton />
         <ModalBody>
           <InputGroup>
-            <Input pr={'20'} ref={commentInputRef} />
-
+            <Input pr={'20'} ref={ref} />
             <InputRightElement w={'fit-content'} mr={1}>
               <IconButton
                 icon={<FaAngleRight size={16} />}
                 size={'sm'}
                 onClick={handleComment}
                 isLoading={loading}
-              ></IconButton>
+              />
             </InputRightElement>
           </InputGroup>
           <VStack mt={'4'} align={'start'}>
@@ -140,24 +141,26 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
                       <VStack>
                         <HStack>
                           <Box fontSize={'sm'}>
+                            <Text
+                              fontWeight={
+                                comment.owner.username === user.username
+                                  ? 'bold'
+                                  : 'medium'
+                              }
+                              mr={2}
+                              display={'inline'}
+                            >
+                              {comment.owner.username}
+                            </Text>
                             <ReactMarkdown
+                              linkTarget={'_blank'}
                               components={ChakraUIRenderer({
-                                p: ({ children }) => (
-                                  <>
-                                    <Text
-                                      fontWeight={'bold'}
-                                      mr={2}
-                                      display={'inline'}
-                                    >
-                                      {comment.owner.username}
-                                    </Text>
-                                    {children}
-                                  </>
-                                ),
+                                p: ({ children }) => <>{children}</>,
                               })}
                               children={comment.content}
-                              remarkPlugins={[remarkGfm]}
-                            ></ReactMarkdown>
+                              remarkPlugins={[remarkGfm, remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            />
                           </Box>
                         </HStack>
                       </VStack>

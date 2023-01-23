@@ -24,7 +24,9 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import ReactPlayer from 'react-player';
 import { Link } from 'react-router-dom';
 import ReactTimeAgo from 'react-time-ago';
+import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import UserContext from '../../contexts/UserContext';
 import QSS from '../utils/qss';
 
@@ -72,10 +74,11 @@ export default function PostCard({ post }) {
       <CardBody pb={!post.media && 'unset'}>
         <ReactMarkdown
           components={ChakraUIRenderer()}
-          remarkPlugins={[remarkGfm]}
-        >
-          {post.content.replace(/\n/g, '\n\n')}
-        </ReactMarkdown>
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          linkTarget={'_blank'}
+          children={post.content.replace(/\n/g, '\n\n')}
+        />
       </CardBody>
       {post?.media?.provider_metadata?.resource_type === 'video' && (
         <Box overflow={'hidden'} pos={'relative'} rounded={'md'} mx={2}>
