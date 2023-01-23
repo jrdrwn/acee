@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/Settings';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -58,16 +59,7 @@ const theme = extendTheme(
 
 function App() {
   return (
-    <ChakraProvider
-      theme={theme}
-      toastOptions={{
-        defaultOptions: {
-          isClosable: true,
-          duration: 3000,
-          position: 'top-right',
-        },
-      }}
-    >
+    <ChakraProvider theme={theme}>
       <RouterProvider router={router} />
     </ChakraProvider>
   );
