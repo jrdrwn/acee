@@ -30,11 +30,13 @@ import remarkMath from 'remark-math';
 import UserContext from '../../contexts/UserContext';
 import QSS from '../utils/qss';
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, previewMode = false, hidden }) {
   const user = useContext(UserContext);
-
+  if (previewMode) {
+    post.owner = user;
+  }
   return (
-    <Card maxW="md" w={'full'} bg={'Background'}>
+    <Card maxW="md" w={'full'} bg={'Background'} hidden={hidden}>
       <CardHeader pb={'unset'}>
         <Flex spacing="4">
           <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
@@ -46,7 +48,7 @@ export default function PostCard({ post }) {
               <Text>@{post.owner.username}</Text>
             </Box>
           </Flex>
-          {user.id === post.owner.id && (
+          {user.id === post.owner.id && !previewMode && (
             <Menu>
               <MenuButton
                 as={IconButton}
@@ -71,48 +73,54 @@ export default function PostCard({ post }) {
           )}
         </Flex>
       </CardHeader>
-      <CardBody pb={!post.media && 'unset'}>
+      <CardBody pb={!previewMode && 'unset'}>
         <ReactMarkdown
           components={ChakraUIRenderer()}
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex]}
           linkTarget={'_blank'}
-          children={post.content.replace(/\n/g, '\n\n')}
+          children={post.content}
         />
-      </CardBody>
-      {post?.media?.provider_metadata?.resource_type === 'video' && (
-        <Box overflow={'hidden'} pos={'relative'} rounded={'md'} mx={2}>
-          <ReactPlayer
-            width="100%"
-            height="100%"
-            controls={true}
+        {post?.media?.provider_metadata?.resource_type === 'video' && (
+          <Box overflow={'hidden'} pos={'relative'} rounded={'md'}>
+            <ReactPlayer
+              width="100%"
+              height="100%"
+              controls={true}
+              fallback={<Skeleton w={'full'} rounded={'md'} />}
+              url={post?.media?.url}
+            />
+          </Box>
+        )}
+        {post?.media?.provider_metadata?.resource_type === 'image' && (
+          <Image
+            rounded={'md'}
+            objectFit={'cover'}
+            src={post?.media?.url}
             fallback={<Skeleton w={'full'} rounded={'md'} />}
-            url={post?.media?.url}
           />
-        </Box>
+        )}
+      </CardBody>
+      {!previewMode && (
+        <CardFooter justify="space-between" flexWrap="wrap">
+          <Link
+            to={QSS({
+              action: 'comment',
+              postId: post.id,
+            })}
+          >
+            <Button leftIcon={<FaComment />}>{post.comments.length}</Button>
+          </Link>
+          <Button leftIcon={<FaCalendar />} variant={'ghost'}>
+            {
+              <ReactTimeAgo
+                date={new Date(post.createdAt)}
+                timeStyle="twitter"
+              />
+            }
+          </Button>
+        </CardFooter>
       )}
-      {post?.media?.provider_metadata?.resource_type === 'image' && (
-        <Image
-          rounded={'md'}
-          objectFit={'cover'}
-          mx={2}
-          src={post?.media?.url}
-          fallback={<Skeleton w={'full'} rounded={'md'} />}
-        />
-      )}
-      <CardFooter justify="space-between" flexWrap="wrap">
-        <Link
-          to={QSS({
-            action: 'comment',
-            postId: post.id,
-          })}
-        >
-          <Button leftIcon={<FaComment />}>{post.comments.length}</Button>
-        </Link>
-        <Button leftIcon={<FaCalendar />} variant={'ghost'}>
-          {<ReactTimeAgo date={new Date(post.createdAt)} timeStyle="twitter" />}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

@@ -1,6 +1,9 @@
+import { CheckIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
+  Card,
+  CardBody,
   IconButton,
   Image,
   Modal,
@@ -13,6 +16,7 @@ import {
   Skeleton,
   Text,
   Textarea,
+  useBoolean,
   useToast,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
@@ -22,8 +26,9 @@ import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
+import PostCard from './PostCard';
 
-function MediaUpload({ media, setMedia }) {
+function MediaUpload({ hidden, media, setMedia }) {
   const [jwt] = reactUseCookie('jwt');
   const toash = useToast({
     position: 'top-right',
@@ -61,17 +66,17 @@ function MediaUpload({ media, setMedia }) {
   }
   return (
     <>
-      {media?.provider_metadata?.resource_type === 'video' && (
+      {media?.provider_metadata?.resource_type === 'video' && hidden && (
         <Box overflow={'hidden'} pos={'relative'} rounded={'md'} mt={4}>
           <IconButton
             icon={<FaTrash />}
             size="sm"
-            rounded={'full'}
+            rounded={'md'}
             pos={'absolute'}
-            top={-2}
-            left={-2}
+            top={1}
+            left={1}
             onClick={handleDeleteMedia}
-            zIndex={1}
+            zIndex={2}
           />
 
           <ReactPlayer
@@ -83,7 +88,7 @@ function MediaUpload({ media, setMedia }) {
           />
         </Box>
       )}
-      {media?.provider_metadata?.resource_type === 'image' && (
+      {media?.provider_metadata?.resource_type === 'image' && hidden && (
         <Box pos={'relative'} mt={4}>
           <IconButton
             icon={<FaTrash />}
@@ -104,7 +109,7 @@ function MediaUpload({ media, setMedia }) {
           />
         </Box>
       )}
-      {!media && (
+      {!media && hidden && (
         <>
           <Button
             leftIcon={<FaUpload />}
@@ -122,6 +127,7 @@ function MediaUpload({ media, setMedia }) {
             flexDirection={'column'}
             w={'full'}
             isLoading={loading}
+            loadingText="Tunggu sebentar..."
           >
             <Text fontWeight={'semibold'} fontSize={'sm'}>
               Unggah foto atau video
@@ -196,7 +202,7 @@ export default function CreatePost({ isOpen }) {
   function handleSubmit() {
     addPost({ media, content });
   }
-
+  const [preview, setPreview] = useBoolean();
   return (
     <Modal
       isOpen={isOpen}
@@ -210,10 +216,26 @@ export default function CreatePost({ isOpen }) {
         <ModalCloseButton />
         <ModalHeader>Buat postingan</ModalHeader>
         <ModalBody>
+          <PostCard
+            post={{
+              content,
+              media,
+            }}
+            previewMode={true}
+            hidden={!preview}
+          />
           <Textarea
+            hidden={preview}
             resize={'none'}
             overflow={'hidden'}
-            placeholder="Anda sedang memikirkan apa???"
+            placeholder={
+              [
+                'Sudahkan anda bersyukur hari ini???',
+                'Apakah anda sedang malas?',
+                'Sudahkan anda berdzikir hari ini?',
+                'Anda sedang memikirkan apa??',
+              ][Math.floor(Math.random() * 4)]
+            }
             _placeholder={{
               fontSize: 'lg',
               fontWeight: 'medium',
@@ -222,10 +244,30 @@ export default function CreatePost({ isOpen }) {
             ref={ref}
             onChange={(ev) => setContent(ev.currentTarget.value)}
           ></Textarea>
-          <MediaUpload media={media} setMedia={setMedia} />
+          <MediaUpload hidden={!preview} media={media} setMedia={setMedia} />
+          <Card variant={'filled'} mt={2} hidden={preview}>
+            <CardBody>
+              <Text fontSize={'xs'} color={'HighlightText'}>
+                Untuk membuat jarak antar paragraf bisa dengan menekan tombol
+                ENTER sebanyak 2 kali. Dan jangan lupa untuk menekan tombol
+                Pratinjau.
+              </Text>
+            </CardBody>
+          </Card>
         </ModalBody>
-        <ModalFooter justifyContent={'space-between'}>
-          <Button isLoading={loading} onClick={handleSubmit}>
+        <ModalFooter gap={2} justifyContent={'start'}>
+          <Button
+            leftIcon={preview ? <ViewOffIcon /> : <ViewIcon />}
+            onClick={setPreview.toggle}
+          >
+            Pratinjau
+          </Button>
+          <Button
+            isLoading={loading}
+            onClick={handleSubmit}
+            colorScheme={'twitter'}
+            leftIcon={<CheckIcon />}
+          >
             Kirim
           </Button>
         </ModalFooter>
