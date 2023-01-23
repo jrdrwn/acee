@@ -1,39 +1,14 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Flex,
-  IconButton,
-  Image,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Skeleton,
-  SkeletonCircle,
-  SkeletonText,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
-import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
+import { VStack } from '@chakra-ui/react';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { BsThreeDotsVertical } from 'react-icons/bs';
-import { FaCalendar, FaComment, FaTrash } from 'react-icons/fa';
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import ReactPlayer from 'react-player';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import ReactTimeAgo from 'react-time-ago';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
-import remarkGfm from 'remark-gfm';
 import { useFetch } from 'use-http';
 import UserContext from '../../contexts/UserContext';
 import QSS from '../utils/qss';
 import CreatePost from './CreatePost';
 import DeletePostConfirmation from './DeletePostConfirmation';
+import PostCard from './PostCard';
+import PostCardSkeleton from './PostCardSkeleton';
 import ViewComments from './ViewComments';
 
 export default function Posts({ filter }) {
@@ -78,14 +53,6 @@ export default function Posts({ filter }) {
     response.ok && setPosts([...posts, ...res.data]);
   }
 
-  const loadMore = (entries) => {
-    const target = entries[0];
-
-    if (target.isIntersecting) {
-      !loading && getPosts();
-    }
-  };
-
   useEffect(() => {
     const options = {
       root: null,
@@ -93,7 +60,13 @@ export default function Posts({ filter }) {
       threshold: 0,
     };
 
-    const observer = new IntersectionObserver(loadMore, options);
+    const observer = new IntersectionObserver((entries) => {
+      const target = entries[0];
+
+      if (target.isIntersecting) {
+        !loading && getPosts();
+      }
+    }, options);
 
     if (loader && loader.current) {
       observer.observe(loader.current);
@@ -109,123 +82,14 @@ export default function Posts({ filter }) {
     <>
       <VStack spacing={4} my={4} maxW={'full'} w={'full'}>
         {posts.map((post, i) => (
-          <Card maxW="md" w={'full'} key={i} bg={'Background'}>
-            <CardHeader pb={'unset'}>
-              <Flex spacing="4">
-                <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
-                  <Avatar
-                    name={post.owner.firstName}
-                    src={post.owner.photo?.url}
-                  />
-                  <Box>
-                    <Text fontWeight={'bold'}>
-                      {post.owner.firstName} {post.owner.lastName}
-                    </Text>
-                    <Text>@{post.owner.username}</Text>
-                  </Box>
-                </Flex>
-                {user.id === post.owner.id && (
-                  <Menu>
-                    <MenuButton
-                      as={IconButton}
-                      icon={<BsThreeDotsVertical />}
-                      variant="ghost"
-                      aria-label="See menu"
-                    />
-                    <MenuList minW={'min-content'}>
-                      <Link
-                        to={QSS({
-                          action: 'delete',
-                          postId: post.id,
-                        })}
-                      >
-                        <MenuItem icon={<FaTrash />} color={'red'}>
-                          Hapus
-                        </MenuItem>
-                      </Link>
-                      {/* <MenuItem icon={<FaPen />}>Edit</MenuItem> */}
-                    </MenuList>
-                  </Menu>
-                )}
-              </Flex>
-            </CardHeader>
-            <CardBody pb={!post.media && 'unset'}>
-              <ReactMarkdown
-                components={ChakraUIRenderer()}
-                remarkPlugins={[remarkGfm]}
-              >
-                {post.content.replace(/\n/g, '\n\n')}
-              </ReactMarkdown>
-            </CardBody>
-            {post?.media?.provider_metadata?.resource_type === 'video' && (
-              <Box overflow={'hidden'} pos={'relative'} rounded={'md'} mx={2}>
-                <ReactPlayer
-                  width="100%"
-                  height="100%"
-                  controls={true}
-                  fallback={<Skeleton w={'full'} rounded={'md'} />}
-                  url={post?.media?.url}
-                />
-              </Box>
-            )}
-            {post?.media?.provider_metadata?.resource_type === 'image' && (
-              <Image
-                rounded={'md'}
-                objectFit={'cover'}
-                mx={2}
-                src={post?.media?.url}
-                fallback={<Skeleton w={'full'} rounded={'md'} />}
-              />
-            )}
-            <CardFooter justify="space-between" flexWrap="wrap">
-              <Link
-                to={QSS({
-                  action: 'comment',
-                  postId: post.id,
-                })}
-              >
-                <Button leftIcon={<FaComment />}>{post.comments.length}</Button>
-              </Link>
-              <Button leftIcon={<FaCalendar />} variant={'ghost'}>
-                {
-                  <ReactTimeAgo
-                    date={new Date(post.createdAt)}
-                    timeStyle="twitter"
-                  />
-                }
-              </Button>
-            </CardFooter>
-          </Card>
+          <PostCard post={post} key={i} />
         ))}
-
-        <Card
-          ref={loader}
-          maxW="md"
-          w={'full'}
-          bg={'Background'}
-          hidden={posts.length === data?.meta?.pagination?.total && !loading}
-        >
-          <CardHeader>
-            <SkeletonCircle size={12} />
-          </CardHeader>
-          <CardBody>
-            <SkeletonText
-              mt={4}
-              mb={2}
-              noOfLines={5}
-              spacing="4"
-              skeletonHeight="2"
-            />
-            <Skeleton>
-              <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia,
-                ut? Eaque sed inventore amet, saepe porro et molestias
-                laudantium quam accusantium natus iste ipsam sequi nisi voluptas
-                veniam accusamus libero.
-              </Text>
-            </Skeleton>
-          </CardBody>
-        </Card>
+        <PostCardSkeleton
+          loader={loader}
+          posts={posts}
+          loading={loading}
+          data={data}
+        />
       </VStack>
 
       <ViewComments
