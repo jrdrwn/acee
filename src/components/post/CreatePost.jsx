@@ -177,7 +177,6 @@ export default function CreatePost({ isOpen }) {
               fontWeight: 'medium',
               color: 'gray',
             }}
-            rows={1}
             ref={ref}
             onChange={(ev) => setContent(ev.currentTarget.value)}
           ></Textarea>
