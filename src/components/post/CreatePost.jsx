@@ -136,6 +136,11 @@ export default function CreatePost({ isOpen }) {
   const [content, setContent] = useState('');
   const [media, setMedia] = useState(null);
   const ref = useRef(null);
+  const toash = useToast({
+    position: 'top-right',
+    duration: 3000,
+    isClosable: true,
+  });
   const { post, response, loading, data } = useFetch(
     import.meta.env.VITE_API_URL,
     {
@@ -144,11 +149,24 @@ export default function CreatePost({ isOpen }) {
       },
     }
   );
+
   useAutosizeTextArea(ref.current, content);
+
   async function addPost(postData) {
     const res = await post('/posts', { data: postData });
     if (response.ok) {
+      toash({
+        title: 'Sukses',
+        description: 'Berhasil membuat postingan',
+        status: 'success',
+      });
       navigate(-1);
+    } else {
+      toash({
+        title: 'Gagal',
+        description: res ? res.error : 'Gagal membuat postingan',
+        status: 'error',
+      });
     }
   }
   function handleSubmit() {
