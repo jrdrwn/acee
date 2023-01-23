@@ -118,7 +118,7 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
         <ModalCloseButton />
         <ModalBody>
           <InputGroup>
-            <Input pr={'20'} ref={ref} />
+            <Input pr={'20'} ref={ref} placeholder="Tulis komentar..." />
             <InputRightElement w={'fit-content'} mr={1}>
               <IconButton
                 icon={<FaAngleRight size={16} />}
@@ -179,7 +179,7 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
               icon={<FaPlus />}
               onClick={() => getComments()}
               size={'sm'}
-              isLoading={loading}
+              hidden={loading}
             />
             <HStack w={'full'} hidden={!loading}>
               <Box>
