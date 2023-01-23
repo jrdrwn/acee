@@ -88,7 +88,7 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
     const res = await get(
       `/posts/${postId}`.concat(
         QSS({
-          populate: 'comments.owner,owner,owner.photo',
+          populate: 'comments.owner,owner,owner.photo,media',
         })
       )
     );
