@@ -18,7 +18,7 @@ const router = createBrowserRouter([
     element: <CheckAuth />,
     children: [
       {
-        path: '/',
+        index: true,
         element: <Home />,
       },
       {
