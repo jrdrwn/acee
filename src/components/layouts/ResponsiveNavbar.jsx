@@ -12,11 +12,11 @@ import {
   IconButton,
   Show,
   Text,
-  useBreakpointValue,
+  VStack,
 } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { FaHome, FaPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import UserContext from '../../contexts/UserContext';
 
 export default function ResponsiveNavBar() {
@@ -25,17 +25,20 @@ export default function ResponsiveNavBar() {
     {
       name: 'Beranda',
       to: '/',
-      icon: <FaHome size={24} />,
+      icon: <FaHome size={20} />,
+      replace: true,
     },
     {
       name: 'Profil',
       to: `/profile/${user.id}`,
-      icon: <FaUser size={24} />,
+      icon: <FaUser size={20} />,
+      replace: true,
     },
     {
       name: 'Buat',
       to: '?action=create',
-      icon: <FaPlus size={24} />,
+      icon: <FaPlus size={20} />,
+      variant: 'solid',
     },
   ];
   return (
@@ -63,36 +66,46 @@ export default function ResponsiveNavBar() {
             </Center>
           </CardHeader>
           <CardBody>
-            {links.map((link) => (
-              <NavLink to={link.to} key={link.to}>
-                <Hide below="md">
-                  <Button
-                    variant={'ghost'}
-                    leftIcon={link.icon}
-                    size={'lg'}
-                    rounded={'full'}
-                    fontSize={'lg'}
-                  >
-                    <Text>{link.name}</Text>
-                  </Button>
-                </Hide>
-                <Hide above="md">
-                  <IconButton
-                    variant={'ghost'}
-                    icon={link.icon}
-                    size={'lg'}
-                    rounded={'full'}
-                    fontSize={'lg'}
-                  >
-                    <Text>{link.name}</Text>
-                  </IconButton>
-                </Hide>
-              </NavLink>
-            ))}
+            <VStack align={'start'}>
+              {links.map((link, i) => (
+                <Box key={i}>
+                  <Hide below="md">
+                    <Button
+                      as={NavLink}
+                      to={link.to}
+                      replace={link.replace}
+                      variant={link.variant ? link.variant : 'ghost'}
+                      colorScheme={'twitter'}
+                      leftIcon={link.icon}
+                      size={'lg'}
+                      rounded={'full'}
+                      fontSize={'lg'}
+                    >
+                      <Text>{link.name}</Text>
+                    </Button>
+                  </Hide>
+                  <Hide above="md">
+                    <IconButton
+                      as={NavLink}
+                      to={link.to}
+                      replace={link.replace}
+                      variant={link.variant ? link.variant : 'ghost'}
+                      colorScheme={'twitter'}
+                      icon={link.icon}
+                      size={'lg'}
+                      rounded={'full'}
+                      fontSize={'lg'}
+                    >
+                      <Text>{link.name}</Text>
+                    </IconButton>
+                  </Hide>
+                </Box>
+              ))}
+            </VStack>
           </CardBody>
           <CardFooter>
-            <Show above="md">
-              <Link to={'/login'} replace={true}>
+            <NavLink to={'/login'} replace={true}>
+              <Show above="md">
                 <Button
                   leftIcon={<FaSignOutAlt size={24} />}
                   colorScheme={'red'}
@@ -102,10 +115,8 @@ export default function ResponsiveNavBar() {
                 >
                   <Text>Keluar</Text>
                 </Button>
-              </Link>
-            </Show>
-            <Show below="md">
-              <Link to={'/login'} replace={true}>
+              </Show>
+              <Show below="md">
                 <IconButton
                   icon={<FaSignOutAlt size={24} />}
                   colorScheme={'red'}
@@ -113,8 +124,8 @@ export default function ResponsiveNavBar() {
                   size={'lg'}
                   fontSize={'lg'}
                 />
-              </Link>
-            </Show>
+              </Show>
+            </NavLink>
           </CardFooter>
         </Card>
       </Show>
@@ -129,19 +140,16 @@ export default function ResponsiveNavBar() {
         >
           <HStack justify={'space-around'}>
             {links.map((link) => (
-              <NavLink to={link.to} relative={'path'} key={link.to}>
-                <Button
-                  variant={'ghost'}
-                  leftIcon={link.icon}
-                  size={'lg'}
-                  borderRadius={'full'}
-                  fontSize={'lg'}
-                >
-                  <Text hidden={useBreakpointValue({ base: true, md: false })}>
-                    {link.name}
-                  </Text>
-                </Button>
-              </NavLink>
+              <IconButton
+                as={NavLink}
+                to={link.to}
+                replace={link.replace}
+                key={link.to}
+                variant={link.variant ? link.variant : 'ghost'}
+                colorScheme={'twitter'}
+                icon={link.icon}
+                rounded={'full'}
+              />
             ))}
           </HStack>
         </Box>

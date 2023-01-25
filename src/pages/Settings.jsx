@@ -8,7 +8,6 @@ import {
   CardBody,
   CardFooter,
   Center,
-  Container,
   FormControl,
   FormErrorMessage,
   HStack,
@@ -210,101 +209,99 @@ export default function Settings() {
     return () => subscription.unsubscribe();
   }, [watch]);
   return (
-    <Container mt={'4'}>
-      <VStack mb={{ base: '16', sm: 'auto' }}>
-        <Card maxW="md" w={'full'} bg={'Background'}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Box>
-              <Cover user={user} setValue={setValue} />
-              <Photo user={user} setValue={setValue} />
-            </Box>
-            <CardBody>
-              <Stack mt={6}>
-                <Stack>
-                  <HStack>
-                    <Box>
-                      <FormControl isInvalid={errors.firstName}>
-                        <InputGroup>
-                          <Input
-                            id="firstName"
-                            type="text"
-                            placeholder={user.firstName}
-                            {...register('firstName', {
-                              minLength: {
-                                value: 1,
-                                message: 'Minimum length should be 1',
-                              },
-                            })}
-                          />
-                        </InputGroup>
-                        <FormErrorMessage>
-                          {errors.firstName && errors.firstName.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                    </Box>
-                    <Box>
-                      <FormControl isInvalid={errors.lastName}>
-                        <InputGroup>
-                          <Input
-                            id="lastName"
-                            type="text"
-                            placeholder={user.lastName}
-                            {...register('lastName')}
-                          />
-                        </InputGroup>
-                        <FormErrorMessage>
-                          {errors.lastName && errors.lastName.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                    </Box>
-                  </HStack>
-                  <FormControl isInvalid={errors.username}>
-                    <InputGroup>
-                      <InputLeftAddon children={<FaUser />} />
-                      <Input
-                        id="username"
-                        type="text"
-                        placeholder={user.username}
-                        {...register('username', {
-                          minLength: {
-                            value: 4,
-                            message: 'Minimum length should be 4',
-                          },
-                        })}
-                      />
-                    </InputGroup>
-                    <FormErrorMessage>
-                      {errors.username && errors.username.message}
-                    </FormErrorMessage>
-                  </FormControl>
-                  <FormControl isInvalid={errors.email}>
-                    <InputGroup>
-                      <InputLeftAddon children={<FaEnvelope />} />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder={user.email}
-                        {...register('email')}
-                      />
-                    </InputGroup>
-                    <FormErrorMessage>
-                      {errors.email && errors.email.message}
-                    </FormErrorMessage>
-                  </FormControl>
-                </Stack>
+    <VStack mt={4} ml={{ sm: '24', md: '36' }} mb={{ base: '20', sm: 'auto' }}>
+      <Card maxW="md" w={'full'} bg={'Background'}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box>
+            <Cover user={user} setValue={setValue} />
+            <Photo user={user} setValue={setValue} />
+          </Box>
+          <CardBody>
+            <Stack mt={6}>
+              <Stack>
+                <HStack>
+                  <Box>
+                    <FormControl isInvalid={errors.firstName}>
+                      <InputGroup>
+                        <Input
+                          id="firstName"
+                          type="text"
+                          placeholder={user.firstName}
+                          {...register('firstName', {
+                            minLength: {
+                              value: 1,
+                              message: 'Minimum length should be 1',
+                            },
+                          })}
+                        />
+                      </InputGroup>
+                      <FormErrorMessage>
+                        {errors.firstName && errors.firstName.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </Box>
+                  <Box>
+                    <FormControl isInvalid={errors.lastName}>
+                      <InputGroup>
+                        <Input
+                          id="lastName"
+                          type="text"
+                          placeholder={user.lastName}
+                          {...register('lastName')}
+                        />
+                      </InputGroup>
+                      <FormErrorMessage>
+                        {errors.lastName && errors.lastName.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </Box>
+                </HStack>
+                <FormControl isInvalid={errors.username}>
+                  <InputGroup>
+                    <InputLeftAddon children={<FaUser />} />
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder={user.username}
+                      {...register('username', {
+                        minLength: {
+                          value: 4,
+                          message: 'Minimum length should be 4',
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {errors.username && errors.username.message}
+                  </FormErrorMessage>
+                </FormControl>
+                <FormControl isInvalid={errors.email}>
+                  <InputGroup>
+                    <InputLeftAddon children={<FaEnvelope />} />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={user.email}
+                      {...register('email')}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {errors.email && errors.email.message}
+                  </FormErrorMessage>
+                </FormControl>
               </Stack>
-            </CardBody>
-            <CardFooter gap={2} justify={'end'}>
-              <Link to={-1}>
-                <Button>Kembali</Button>
-              </Link>
-              <Button colorScheme={'twitter'} isLoading={loading} type="submit">
-                Simpan
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      </VStack>
-    </Container>
+            </Stack>
+          </CardBody>
+          <CardFooter gap={2} justify={'end'}>
+            <Link to={-1}>
+              <Button>Kembali</Button>
+            </Link>
+            <Button colorScheme={'twitter'} isLoading={loading} type="submit">
+              Simpan
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </VStack>
   );
 }

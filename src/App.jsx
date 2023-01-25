@@ -4,6 +4,7 @@ import '@fontsource/inter/variable.css';
 import { withProse } from '@nikolovlazar/chakra-ui-prose';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import CheckAuth from './auth/CheckAuth';
+import Layout from './components/layouts/Layout';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -18,34 +19,46 @@ const router = createBrowserRouter([
     element: <CheckAuth />,
     children: [
       {
-        index: true,
-        element: <Home />,
-      },
-      {
-        element: <Profile />,
-        path: '/profile/:userId',
-      },
-      {
-        element: <Settings />,
-        path: '/settings',
+        path: '/',
+        element: <Layout />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            element: <Profile />,
+            path: '/profile/:userId',
+          },
+          {
+            element: <Settings />,
+            path: '/settings',
+          },
+        ],
       },
     ],
   },
   {
-    element: <Register />,
-    path: '/register',
-  },
-  {
-    element: <Login />,
-    path: '/login',
-  },
-  {
-    element: <ForgotPassword />,
-    path: '/forgot-password',
-  },
-  {
-    element: <ResetPassword />,
-    path: '/reset-password',
+    element: <Layout navigation={false} maxW={'md'} />,
+    path: '/',
+    children: [
+      {
+        element: <Register />,
+        path: '/register',
+      },
+      {
+        element: <Login />,
+        path: '/login',
+      },
+      {
+        element: <ForgotPassword />,
+        path: '/forgot-password',
+      },
+      {
+        element: <ResetPassword />,
+        path: '/reset-password',
+      },
+    ],
   },
 ]);
 

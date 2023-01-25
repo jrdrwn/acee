@@ -1,5 +1,4 @@
-import { Container, VStack } from '@chakra-ui/react';
-import ResponsiveNavBar from '../components/layouts/ResponsiveNavbar';
+import { VStack } from '@chakra-ui/react';
 import Posts from '../components/post/Posts';
 
 function HomeBody() {
@@ -11,12 +10,7 @@ function HomeBody() {
 }
 
 function Home() {
-  return (
-    <Container>
-      <ResponsiveNavBar />
-      <HomeBody />
-    </Container>
-  );
+  return <HomeBody />;
 }
 
 export default Home;
