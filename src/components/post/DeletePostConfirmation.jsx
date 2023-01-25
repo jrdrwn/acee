@@ -8,7 +8,6 @@ import {
   Button,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
 
 export default function DeletePostConfirmation({
   isOpen,
@@ -20,7 +19,7 @@ export default function DeletePostConfirmation({
   return (
     <AlertDialog isOpen={isOpen}>
       <AlertDialogOverlay>
-        <AlertDialogContent {...ResponsiveModalStyle}>
+        <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
             Hapus postingan
           </AlertDialogHeader>

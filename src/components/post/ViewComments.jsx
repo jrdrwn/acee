@@ -30,7 +30,6 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { useFetch } from 'use-http';
 import UserContext from '../../contexts/UserContext';
-import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
 import QSS from '../utils/qss';
 
 export default function ViewComments({ postId, setPosts, posts, isOpen }) {
@@ -113,7 +112,7 @@ export default function ViewComments({ postId, setPosts, posts, isOpen }) {
       scrollBehavior="inside"
     >
       <ModalOverlay />
-      <ModalContent {...ResponsiveModalStyle}>
+      <ModalContent>
         <ModalHeader>Komentar</ModalHeader>
         <ModalCloseButton />
         <ModalBody>

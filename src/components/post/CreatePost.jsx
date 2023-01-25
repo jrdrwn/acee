@@ -25,7 +25,6 @@ import ReactPlayer from 'react-player';
 import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
-import ResponsiveModalStyle from '../../sx/ResponsiveModalStyle';
 import PostCard from './PostCard';
 
 function MediaUpload({ hidden, media, setMedia }) {
@@ -212,7 +211,7 @@ export default function CreatePost({ isOpen }) {
       size={'full'}
     >
       <ModalOverlay />
-      <ModalContent {...ResponsiveModalStyle} overflowY={'auto'}>
+      <ModalContent overflowY={'auto'}>
         <ModalCloseButton />
         <ModalHeader>Buat postingan</ModalHeader>
         <ModalBody>

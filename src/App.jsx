@@ -51,6 +51,27 @@ const router = createBrowserRouter([
 
 const theme = extendTheme(
   {
+    components: {
+      Modal: {
+        baseStyle: {
+          dialog: {
+            position: ['fixed', 'relative'],
+            margin: [0, 'auto'],
+            width: ['full', 'md'],
+            bottom: 0,
+            insetX: 0,
+            roundedBottom: ['unset', 'md'],
+          },
+        },
+        sizes: {
+          md: {
+            dialog: {
+              maxWidth: 'unset',
+            },
+          },
+        },
+      },
+    },
     colors: { ...proTheme.colors },
   },
   proTheme,
