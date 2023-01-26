@@ -11,7 +11,6 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Search from './pages/Search';
-import Settings from './pages/Settings';
 
 const router = createBrowserRouter([
   {
@@ -33,10 +32,6 @@ const router = createBrowserRouter([
           {
             element: <Profile />,
             path: '/profile/:userId',
-          },
-          {
-            element: <Settings />,
-            path: '/settings',
           },
         ],
       },
