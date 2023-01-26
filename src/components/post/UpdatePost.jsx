@@ -90,7 +90,7 @@ export default function UpdatePost({ isOpen, post = {}, setPosts, postId }) {
       <ModalOverlay />
       <ModalContent overflowY={'auto'}>
         <ModalCloseButton />
-        <ModalHeader>Buat postingan</ModalHeader>
+        <ModalHeader>Perbarui postingan</ModalHeader>
         <ModalBody>
           <PostCard
             post={{
