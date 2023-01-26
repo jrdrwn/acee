@@ -70,7 +70,7 @@ export default function ResponsiveNavBar() {
             </Center>
           </CardHeader>
           <CardBody>
-            <VStack align={'start'}>
+            <VStack align={'stretch'} spacing={1}>
               {links.map((link, i) => (
                 <Box key={i}>
                   <Show above="md">
@@ -84,6 +84,9 @@ export default function ResponsiveNavBar() {
                       size={'lg'}
                       rounded={'full'}
                       fontSize={'lg'}
+                      w="full"
+                      mt={link.variant && 4}
+                      justifyContent={link.variant ? 'center' : 'start'}
                     >
                       <Text>{link.name}</Text>
                     </Button>
@@ -108,28 +111,29 @@ export default function ResponsiveNavBar() {
             </VStack>
           </CardBody>
           <CardFooter>
-            <NavLink to={'/login'} replace={true}>
+            <Box w={'full'} as={NavLink} to={'/login'} replace={true}>
               <Show above="md">
                 <Button
-                  leftIcon={<FaSignOutAlt size={24} />}
+                  leftIcon={<FaSignOutAlt size={20} />}
                   colorScheme={'red'}
                   rounded={'full'}
                   size={'lg'}
                   fontSize={'lg'}
+                  w={'full'}
                 >
                   <Text>Keluar</Text>
                 </Button>
               </Show>
               <Show below="md">
                 <IconButton
-                  icon={<FaSignOutAlt size={24} />}
+                  icon={<FaSignOutAlt size={20} />}
                   colorScheme={'red'}
                   rounded={'full'}
                   size={'lg'}
                   fontSize={'lg'}
                 />
               </Show>
-            </NavLink>
+            </Box>
           </CardFooter>
         </Card>
       </Show>
