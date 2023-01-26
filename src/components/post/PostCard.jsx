@@ -19,7 +19,7 @@ import {
 import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
 import { useContext } from 'react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { FaCalendar, FaComment, FaTrash } from 'react-icons/fa';
+import { FaCalendar, FaComment, FaPen, FaTrash } from 'react-icons/fa';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import ReactPlayer from 'react-player';
 import { Link } from 'react-router-dom';
@@ -36,20 +36,22 @@ export default function PostCard({ post, previewMode = false, hidden }) {
     post.owner = user;
   }
   return (
-    <Card maxW="md" w={'full'} bg={'Background'} hidden={hidden}>
+    <Card maxW="md" w={'full'} hidden={hidden} variant={'outline'}>
       <CardHeader pb={'unset'}>
         <Flex spacing="4">
           <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
             <Avatar name={post.owner.firstName} src={post.owner.photo?.url} />
             <Box>
-              <Text fontWeight={'bold'}>
+              <Text fontWeight={'semibold'}>
                 {post.owner.firstName} {post.owner.lastName}
               </Text>
-              <Text>@{post.owner.username}</Text>
+              <Text color={'GrayText'} fontWeight={'medium'}>
+                @{post.owner.username}
+              </Text>
             </Box>
           </Flex>
           {user.id === post.owner.id && !previewMode && (
-            <Menu>
+            <Menu isLazy>
               <MenuButton
                 as={IconButton}
                 icon={<BsThreeDotsVertical />}
@@ -57,17 +59,26 @@ export default function PostCard({ post, previewMode = false, hidden }) {
                 aria-label="See menu"
               />
               <MenuList minW={'min-content'}>
-                <Link
+                <MenuItem
+                  as={Link}
                   to={QSS({
                     action: 'delete',
                     postId: post.id,
                   })}
+                  icon={<FaTrash />}
                 >
-                  <MenuItem icon={<FaTrash />} color={'red'}>
-                    Hapus
-                  </MenuItem>
-                </Link>
-                {/* <MenuItem icon={<FaPen />}>Edit</MenuItem> */}
+                  Hapus
+                </MenuItem>
+                <MenuItem
+                  as={Link}
+                  to={QSS({
+                    action: 'update',
+                    postId: post.id,
+                  })}
+                  icon={<FaPen />}
+                >
+                  Edit
+                </MenuItem>
               </MenuList>
             </Menu>
           )}

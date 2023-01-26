@@ -49,7 +49,7 @@ export default function ResponsiveNavBar() {
           left={0}
           w="min-content"
           top={0}
-          bg={'Background'}
+          variant={'outline'}
           overflowY={'auto'}
           m={2}
           sx={{
@@ -69,7 +69,7 @@ export default function ResponsiveNavBar() {
             <VStack align={'start'}>
               {links.map((link, i) => (
                 <Box key={i}>
-                  <Hide below="md">
+                  <Show above="md">
                     <Button
                       as={NavLink}
                       to={link.to}
@@ -83,8 +83,8 @@ export default function ResponsiveNavBar() {
                     >
                       <Text>{link.name}</Text>
                     </Button>
-                  </Hide>
-                  <Hide above="md">
+                  </Show>
+                  <Show below="md">
                     <IconButton
                       as={NavLink}
                       to={link.to}
@@ -98,7 +98,7 @@ export default function ResponsiveNavBar() {
                     >
                       <Text>{link.name}</Text>
                     </IconButton>
-                  </Hide>
+                  </Show>
                 </Box>
               ))}
             </VStack>
@@ -129,14 +129,15 @@ export default function ResponsiveNavBar() {
           </CardFooter>
         </Card>
       </Show>
-      <Hide above="sm">
-        <Box
+      <Show below="sm">
+        <Card
           position={'fixed'}
           insetX={0}
           bottom={0}
-          bg={'bg-surface'}
+          variant={'outline'}
+          roundedBottom={'unset'}
           p={2}
-          zIndex={999}
+          zIndex={'overlay'}
         >
           <HStack justify={'space-around'}>
             {links.map((link) => (
@@ -152,8 +153,8 @@ export default function ResponsiveNavBar() {
               />
             ))}
           </HStack>
-        </Box>
-      </Hide>
+        </Card>
+      </Show>
     </>
   );
 }

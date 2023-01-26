@@ -9,6 +9,7 @@ import CreatePost from './CreatePost';
 import DeletePostConfirmation from './DeletePostConfirmation';
 import PostCard from './PostCard';
 import PostCardSkeleton from './PostCardSkeleton';
+import UpdatePost from './UpdatePost';
 import ViewComments from './ViewComments';
 
 export default function Posts({ filter }) {
@@ -30,7 +31,7 @@ export default function Posts({ filter }) {
     }
   );
   async function deletePost(postId) {
-    await del(`/${postId}`.concat(QSS({ populate: 'owner.*' })));
+    await del(`/${postId}`.concat(QSS({ populate: '*' })));
 
     if (response.ok) {
       setPosts((posts) => posts.filter((post) => post.id != postId));
@@ -80,7 +81,7 @@ export default function Posts({ filter }) {
 
   return (
     <>
-      <VStack spacing={4} my={4} maxW={'full'} w={'full'}>
+      <VStack spacing={2} my={2} maxW={'full'} w={'full'}>
         {posts.map((post, i) => (
           <PostCard post={post} key={i} />
         ))}
@@ -96,6 +97,12 @@ export default function Posts({ filter }) {
         isOpen={query.get('action') === 'comment'}
         postId={query.get('postId')}
         posts={posts}
+        setPosts={setPosts}
+      />
+      <UpdatePost
+        isOpen={query.get('action') === 'update'}
+        postId={query.get('postId')}
+        post={posts.filter((post) => post.id == query.get('postId'))[0]}
         setPosts={setPosts}
       />
 

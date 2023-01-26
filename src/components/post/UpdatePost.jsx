@@ -15,7 +15,7 @@ import {
   useBoolean,
   useToast,
 } from '@chakra-ui/react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
@@ -23,54 +23,67 @@ import MediaUpload from './MediaUpload';
 import PostCard from './PostCard';
 import useAutosizeTextArea from './useAutoSizeTextArea';
 
-export default function CreatePost({ isOpen }) {
+export default function UpdatePost({ isOpen, post = {}, setPosts, postId }) {
   const navigate = useNavigate();
   const [jwt] = reactUseCookie('jwt');
   const [content, setContent] = useState('');
   const [media, setMedia] = useState(null);
+  const [preview, setPreview] = useBoolean();
   const ref = useRef(null);
   const toash = useToast({
     position: 'top-right',
     duration: 3000,
     isClosable: true,
   });
-  const { post, response, loading, data } = useFetch(
-    import.meta.env.VITE_API_URL,
-    {
-      headers: {
-        authorization: `Bearer ${jwt}`,
-      },
-    }
-  );
+  const { put, response, loading } = useFetch(import.meta.env.VITE_API_URL, {
+    headers: {
+      authorization: `Bearer ${jwt}`,
+    },
+  });
 
   useAutosizeTextArea(ref.current, content);
 
-  async function addPost(postData) {
-    const res = await post('/posts', { data: postData });
+  async function updatePost(postData) {
+    const res = await put(`/posts/${postId}?populate=*`, {
+      data: postData,
+    });
     if (response.ok) {
       toash({
         title: 'Sukses',
-        description: 'Berhasil membuat postingan',
+        description: 'Berhasil memperbarui postingan',
         status: 'success',
       });
+      setPosts((posts) =>
+        posts.map((post) => {
+          if (post.id == res.data.id) {
+            post.content = res.data.content;
+            post.media = res.data.media;
+          }
+          return post;
+        })
+      );
       navigate(-1);
     } else {
       toash({
         title: 'Gagal',
-        description: res ? res.error : 'Gagal membuat postingan',
+        description: res ? res.error : 'Gagal memperbarui postingan',
         status: 'error',
       });
     }
   }
   function handleSubmit() {
-    addPost({ media, content });
+    updatePost({ media, content });
   }
-  const [preview, setPreview] = useBoolean();
+
+  useEffect(() => {
+    setContent(post.content);
+    setMedia(post.media);
+  }, [post]);
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={() => navigate(-1)}
-      onCloseComplete={() => data && window.location.reload()}
       scrollBehavior="inside"
       size={'full'}
     >
@@ -104,6 +117,7 @@ export default function CreatePost({ isOpen }) {
               fontWeight: 'medium',
               color: 'gray',
             }}
+            value={content}
             ref={ref}
             onChange={(ev) => setContent(ev.currentTarget.value)}
           ></Textarea>
@@ -131,7 +145,7 @@ export default function CreatePost({ isOpen }) {
             colorScheme={'twitter'}
             leftIcon={<CheckIcon />}
           >
-            Kirim
+            Perbarui
           </Button>
         </ModalFooter>
       </ModalContent>

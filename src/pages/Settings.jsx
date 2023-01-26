@@ -210,7 +210,7 @@ export default function Settings() {
   }, [watch]);
   return (
     <VStack mt={4} ml={{ sm: '24', md: '36' }} mb={{ base: '20', sm: 'auto' }}>
-      <Card maxW="md" w={'full'} bg={'Background'}>
+      <Card maxW="md" w={'full'} variant={'outline'}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box>
             <Cover user={user} setValue={setValue} />

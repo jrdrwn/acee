@@ -41,7 +41,7 @@ export default function Profile() {
     getUserById(userId);
   }, []);
   return (
-    <VStack mt={4} ml={{ sm: '24', md: '36' }} mb={{ base: '20', sm: 'auto' }}>
+    <VStack mt={2} ml={{ sm: '24', md: '36' }} mb={{ base: '20', sm: 'auto' }}>
       <Show below="sm">
         <Box
           maxW={'md'}
@@ -59,7 +59,7 @@ export default function Profile() {
           </Link>
         </Box>
       </Show>
-      <Card maxW="md" w={'full'} bg={'Background'}>
+      <Card maxW="md" w={'full'} variant={'outline'}>
         <Box>
           <AspectRatio ratio={16 / 4} w={'full'}>
             <Image
