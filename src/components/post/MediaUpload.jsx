@@ -107,7 +107,6 @@ export default function MediaUpload({ hidden, media, setMedia }) {
             as={'label'}
             htmlFor="media-upload"
             variant={'outline'}
-            cursor={'pointer'}
             flexDirection={'column'}
             w={'full'}
             isLoading={loading}

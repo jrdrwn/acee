@@ -8,14 +8,13 @@ import {
   CardHeader,
   Center,
   HStack,
-  Hide,
   IconButton,
   Show,
   Text,
   VStack,
 } from '@chakra-ui/react';
 import { useContext } from 'react';
-import { FaHome, FaPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { FaHome, FaPlus, FaSearch, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import UserContext from '../../contexts/UserContext';
 
@@ -27,6 +26,11 @@ export default function ResponsiveNavBar() {
       to: '/',
       icon: <FaHome size={20} />,
       replace: true,
+    },
+    {
+      name: 'Cari',
+      to: '/search',
+      icon: <FaSearch size={20} />,
     },
     {
       name: 'Profil',

@@ -41,7 +41,7 @@ export default function Profile() {
     getUserById(userId);
   }, []);
   return (
-    <VStack mt={2} ml={{ sm: '24', md: '36' }} mb={{ base: '20', sm: 'auto' }}>
+    <VStack>
       <Show below="sm">
         <Box
           maxW={'md'}

@@ -18,8 +18,8 @@ import {
   InputLeftAddon,
   Skeleton,
   Stack,
-  VStack,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -82,18 +82,19 @@ function Cover({ user, setValue }) {
         id="upload-cover"
         hidden
       />
-      <IconButton
+      <Button
         isLoading={loading}
-        icon={<EditIcon />}
+        leftIcon={<EditIcon />}
         rounded={'full'}
-        size={'sm'}
+        size={'xs'}
         pos={'absolute'}
-        colorScheme={'blue'}
-        top={'-2'}
-        left={'-2'}
+        top={1}
+        left={1}
         as={'label'}
         htmlFor="upload-cover"
-      />
+      >
+        Perbarui Sampul
+      </Button>
     </Box>
   );
 }
@@ -209,7 +210,7 @@ export default function Settings() {
     return () => subscription.unsubscribe();
   }, [watch]);
   return (
-    <VStack mt={4} ml={{ sm: '24', md: '36' }} mb={{ base: '20', sm: 'auto' }}>
+    <VStack mt={2}>
       <Card maxW="md" w={'full'} variant={'outline'}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box>

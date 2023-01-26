@@ -14,7 +14,7 @@ export default function PostCardSkeleton({ loader, posts, data, loading }) {
       ref={loader}
       maxW="md"
       w={'full'}
-      bg={'Background'}
+      variant={'outline'}
       hidden={posts.length === data?.meta?.pagination?.total && !loading}
     >
       <CardHeader>

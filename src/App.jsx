@@ -1,8 +1,8 @@
 import { theme as proTheme } from '@chakra-ui/pro-theme';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import '@fontsource/inter/variable.css';
+import '@fontsource/ubuntu';
 import { withProse } from '@nikolovlazar/chakra-ui-prose';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import CheckAuth from './auth/CheckAuth';
 import Layout from './components/layouts/Layout';
 import ForgotPassword from './pages/ForgotPassword';
@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
+import Search from './pages/Search';
 import Settings from './pages/Settings';
 
 const router = createBrowserRouter([
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <Home />,
+          },
+          {
+            element: <Search />,
+            path: '/search',
           },
           {
             element: <Profile />,
@@ -82,6 +87,11 @@ const theme = extendTheme(
               maxWidth: 'unset',
             },
           },
+        },
+      },
+      Button: {
+        baseStyle: {
+          cursor: 'pointer',
         },
       },
     },

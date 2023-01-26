@@ -81,7 +81,7 @@ export default function Posts({ filter }) {
 
   return (
     <>
-      <VStack spacing={2} my={2} maxW={'full'} w={'full'}>
+      <VStack spacing={2} maxW={'full'} w={'full'}>
         {posts.map((post, i) => (
           <PostCard post={post} key={i} />
         ))}
