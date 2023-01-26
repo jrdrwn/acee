@@ -1,6 +1,5 @@
 import { theme as proTheme } from '@chakra-ui/pro-theme';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import '@fontsource/ubuntu';
 import { withProse } from '@nikolovlazar/chakra-ui-prose';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import CheckAuth from './auth/CheckAuth';
