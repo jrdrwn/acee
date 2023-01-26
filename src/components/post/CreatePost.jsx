@@ -108,7 +108,7 @@ export default function CreatePost({ isOpen }) {
             onChange={(ev) => setContent(ev.currentTarget.value)}
           ></Textarea>
           <MediaUpload hidden={!preview} media={media} setMedia={setMedia} />
-          <Card variant={'filled'} mt={2} hidden={preview}>
+          <Card variant={'outline'} mt={2} hidden={preview}>
             <CardBody>
               <Text fontSize={'xs'} color={'HighlightText'}>
                 Untuk membuat jarak antar paragraf bisa dengan menekan tombol

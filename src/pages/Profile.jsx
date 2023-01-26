@@ -1,45 +1,46 @@
+import { EditIcon } from '@chakra-ui/icons';
 import {
   AspectRatio,
   Avatar,
   Box,
+  Button,
   Card,
   CardBody,
+  CardFooter,
   Center,
+  FormControl,
+  FormErrorMessage,
   HStack,
+  IconButton,
   Image,
+  Input,
+  InputGroup,
+  InputLeftAddon,
   Skeleton,
+  Stack,
   Tab,
   TabList,
   TabPanel,
   TabPanels,
   Tabs,
   Text,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
-import { FaCog, FaRegNewspaper, FaUserAlt } from 'react-icons/fa';
-import { useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import {
+  FaCog,
+  FaEnvelope,
+  FaRegNewspaper,
+  FaUser,
+  FaUserAlt,
+} from 'react-icons/fa';
+import { Link, useParams } from 'react-router-dom';
 import reactUseCookie from 'react-use-cookie';
 import { useFetch } from 'use-http';
 import Posts from '../components/post/Posts';
 import UserContext from '../contexts/UserContext';
-
-import { EditIcon } from '@chakra-ui/icons';
-import {
-  Button,
-  CardFooter,
-  FormControl,
-  FormErrorMessage,
-  IconButton,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  Stack,
-  useToast,
-} from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
-import { FaEnvelope, FaUser } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
 
 function Cover({ user, setValue }) {
   const [jwt] = reactUseCookie('jwt');
@@ -192,7 +193,6 @@ function Settings() {
   } = useForm({
     defaultValues: user,
   });
-
   const { put, response, loading } = useFetch(import.meta.env.VITE_API_URL, {
     headers: {
       authorization: `Bearer ${jwt}`,

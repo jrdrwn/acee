@@ -121,10 +121,11 @@ export default function PostCard({ post, previewMode = false, hidden }) {
               postId: post.id,
             })}
             leftIcon={<FaComment />}
+            size={'sm'}
           >
             {post.comments.length}
           </Button>
-          <Button leftIcon={<FaCalendar />} variant={'ghost'}>
+          <Button leftIcon={<FaCalendar />} size={'sm'}>
             {
               <ReactTimeAgo
                 date={new Date(post.createdAt)}
