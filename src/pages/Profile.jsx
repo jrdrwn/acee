@@ -385,6 +385,7 @@ function UserDetails({ userId }) {
 
 export default function Profile() {
   let { userId } = useParams();
+  const user = useContext(UserContext);
   return (
     <VStack>
       <Tabs variant="soft-rounded" isFitted maxW={'md'} w={'full'} isLazy>
@@ -395,9 +396,11 @@ export default function Profile() {
           <Tab>
             <FaRegNewspaper size={20} />
           </Tab>
-          <Tab>
-            <FaCog size={20} />
-          </Tab>
+          {user.id == userId && (
+            <Tab>
+              <FaCog size={20} />
+            </Tab>
+          )}
         </TabList>
 
         <TabPanels>
@@ -407,9 +410,11 @@ export default function Profile() {
           <TabPanel px={'unset'}>
             <Posts filter={{ userId }} />
           </TabPanel>
-          <TabPanel px={'unset'}>
-            <Settings />
-          </TabPanel>
+          {user.id == userId && (
+            <TabPanel px={'unset'}>
+              <Settings />
+            </TabPanel>
+          )}
         </TabPanels>
       </Tabs>
     </VStack>
