@@ -27,6 +27,7 @@ export default function PostCardSkeleton({ loader, posts, data, loading }) {
           noOfLines={5}
           spacing="4"
           skeletonHeight="2"
+          color={'GrayText'}
         />
         <Skeleton rounded={'md'}>
           <Text>
