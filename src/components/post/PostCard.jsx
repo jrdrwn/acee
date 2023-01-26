@@ -38,7 +38,7 @@ export default function PostCard({ post, previewMode = false, hidden }) {
   return (
     <Card maxW="md" w={'full'} hidden={hidden} variant={'outline'}>
       <CardHeader pb={'unset'}>
-        <Flex spacing="4">
+        <Flex spacing="4" align={'center'}>
           <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
             <Avatar name={post.owner.firstName} src={post.owner.photo?.url} />
             <Box>
@@ -114,14 +114,16 @@ export default function PostCard({ post, previewMode = false, hidden }) {
       </CardBody>
       {!previewMode && (
         <CardFooter justify="space-between" flexWrap="wrap">
-          <Link
+          <Button
+            as={Link}
             to={QSS({
               action: 'comment',
               postId: post.id,
             })}
+            leftIcon={<FaComment />}
           >
-            <Button leftIcon={<FaComment />}>{post.comments.length}</Button>
-          </Link>
+            {post.comments.length}
+          </Button>
           <Button leftIcon={<FaCalendar />} variant={'ghost'}>
             {
               <ReactTimeAgo
