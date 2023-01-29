@@ -47,7 +47,10 @@ export default function Posts({ filter }) {
           start: posts.length,
           limit: 3,
         },
-        filters: { owner: { id: filter?.userId } },
+        _q: filter?.content,
+        filters: {
+          owner: { id: filter?.userId },
+        },
         sort: 'createdAt:desc',
       })
     );
@@ -78,7 +81,9 @@ export default function Posts({ filter }) {
   useEffect(() => {
     getPosts();
   }, []);
-
+  useEffect(() => {
+    setPosts([]);
+  }, [filter?.content]);
   return (
     <>
       <VStack spacing={2} maxW={'full'} w={'full'}>

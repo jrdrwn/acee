@@ -28,6 +28,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import UserContext from '../../contexts/UserContext';
+import { FollowTag } from '../FollowButton';
 import QSS from '../utils/qss';
 
 export default function PostCard({ post, previewMode = false, hidden }) {
@@ -44,6 +45,7 @@ export default function PostCard({ post, previewMode = false, hidden }) {
             <Box>
               <Text fontWeight={'semibold'}>
                 {post.owner.firstName} {post.owner.lastName}
+                <FollowTag userId={post.owner.id} />
               </Text>
               <Text color={'GrayText'} fontWeight={'medium'}>
                 @{post.owner.username}
