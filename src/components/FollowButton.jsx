@@ -77,7 +77,7 @@ export function FollowTag({ userId }) {
     check();
   }, []);
   return (
-    <Badge hidden={userId === me.id} variant={'outline'} ml="2">
+    <Badge hidden={userId === me.id} ml="2" size={'xs'}>
       {isFollowed.id ? 'Diikuti' : 'Ikuti'}
     </Badge>
   );
