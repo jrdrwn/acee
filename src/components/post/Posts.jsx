@@ -45,7 +45,7 @@ export default function Posts({ filter }) {
         populate: 'owner,comments,owner.photo,media',
         pagination: {
           start: posts.length,
-          limit: 3,
+          limit: 10,
         },
         _q: filter?.content,
         filters: {
